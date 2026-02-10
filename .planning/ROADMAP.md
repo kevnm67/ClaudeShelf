@@ -2,11 +2,16 @@
 
 ## Overview
 
-Build a native macOS SwiftUI app from the ground up that replaces the Go-based ClaudeShelf web app. Start with project foundation and data models, then port the file scanning engine from Go, build the three-column UI, add a syntax-highlighted editor, implement safe file operations, wire up live file watching, and finish with cleanup tools, export, and platform polish.
+Build a native macOS SwiftUI app from the ground up that replaces the Go-based ClaudeShelf web app. Start with project foundation and data models, then port the file scanning engine from Go, build the three-column UI, add a syntax-highlighted editor, implement safe file operations, wire up live file watching, and finish with cleanup tools, export, and platform polish. Then harden the app with security fixes, async correctness, test coverage, and accessibility.
 
 ## Domain Expertise
 
 None
+
+## Milestones
+
+- ✅ **v1.0 MVP** - Phases 1-7 (shipped 2026-02-10)
+- 🚧 **v1.1 Audit Fixes & Hardening** - Phases 8-14 (in progress)
 
 ## Phases
 
@@ -16,6 +21,9 @@ None
 
 Decimal phases appear between their surrounding integers in numeric order.
 
+<details>
+<summary>✅ v1.0 MVP (Phases 1-7) — SHIPPED 2026-02-10</summary>
+
 - [x] **Phase 1: Foundation** - Xcode project, app architecture, data models, MVVM scaffolding
 - [x] **Phase 2: File Scanner** - Core scanning engine ported from Go: locations, categories, path decoding, skip rules, depth limits
 - [x] **Phase 3: Core UI** - Three-column NavigationSplitView, sidebar with categories, file list, search, keyboard navigation
@@ -24,7 +32,22 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 6: File Watching** - FSEvents-based watching, auto-refresh, manual rescan, configurable scan locations
 - [x] **Phase 7: Cleanup, Export & Polish** - Cleanup analysis & modal, zip export, multiple windows, Quick Look, menu bar, dark/light mode
 
+</details>
+
+### 🚧 v1.1 Audit Fixes & Hardening (Phases 8-14)
+
+- [ ] **Phase 8: Critical Sandbox & Safety** - Fix sandbox entitlements blocking scanning, FileWatcher actor isolation
+- [ ] **Phase 9: Security Hardening** - TOCTOU save race, symlink protection, error sanitization
+- [ ] **Phase 10: Async & Main Thread Safety** - Async export, async cleanup analysis, NSSavePanel modernization
+- [ ] **Phase 11: FileWatcher FSEvents Rewrite** - Replace DispatchSource with recursive FSEvents watching
+- [ ] **Phase 12: Error Handling & Accessibility** - Silent trash fix, stale metadata, VoiceOver labels
+- [ ] **Phase 13: Testability & Test Coverage** - Protocol boundaries, DI, FileScanner/AppState/SyntaxHighlighter tests
+- [ ] **Phase 14: Code Quality Polish** - Logger consistency, ByteCountFormatter, placeholder test, DiffLine IDs
+
 ## Phase Details
+
+<details>
+<summary>✅ v1.0 MVP Phase Details</summary>
 
 ### Phase 1: Foundation
 **Goal**: Xcode project with app shell, MVVM architecture, all core data models, and the basic app entry point running
@@ -102,17 +125,91 @@ Plans:
 - [x] 07-02: Zip export of selected files
 - [x] 07-03: Multiple windows, Quick Look (spacebar preview), menu bar, dark/light mode, final polish
 
+
+</details>
+
+### Phase 8: Critical Sandbox & Safety
+**Goal**: Fix the two critical blockers — sandbox entitlements that prevent the app from scanning any directories, and FileWatcher actor isolation violation in deinit that causes a data race
+**Depends on**: v1.0 complete
+**Research**: Unlikely (entitlements documentation, Swift actor isolation rules)
+**Plans**: TBD
+
+Plans:
+- [ ] 08-01: TBD (run /gsd:plan-phase 8 to break down)
+
+### Phase 9: Security Hardening
+**Goal**: Eliminate TOCTOU race in file save (files briefly world-readable), add symlink loop protection in scanner, sanitize error messages to prevent raw path leakage
+**Depends on**: Phase 8
+**Research**: Unlikely (POSIX file permission APIs, FileManager symlink detection)
+**Plans**: TBD
+
+Plans:
+- [ ] 09-01: TBD
+
+### Phase 10: Async & Main Thread Safety
+**Goal**: Make ExportService.exportAsZip and CleanupAnalyzer.analyze async to prevent main thread blocking, modernize NSSavePanel to async pattern
+**Depends on**: Phase 9
+**Research**: Unlikely (Swift concurrency patterns, Process terminationHandler)
+**Plans**: TBD
+
+Plans:
+- [ ] 10-01: TBD
+
+### Phase 11: FileWatcher FSEvents Rewrite
+**Goal**: Replace per-directory DispatchSource watching with FSEvents-based recursive watching so subdirectory file changes are detected (current watcher misses most changes)
+**Depends on**: Phase 10
+**Research**: Likely (FSEvents C API from Swift, recursive monitoring patterns)
+**Research topics**: FSEventStreamCreate vs DispatchSource for recursive watching, FSEventStreamEventFlags interpretation, actor-safe callback patterns for FSEvents in Swift 6
+**Plans**: TBD
+
+Plans:
+- [ ] 11-01: TBD
+
+### Phase 12: Error Handling & Accessibility
+**Goal**: Fix silent trash failure in FileRowView (user gets no feedback), handle stale FileEntry metadata between scans, add VoiceOver accessibility labels and button traits to interactive elements
+**Depends on**: Phase 11
+**Research**: Unlikely (SwiftUI accessibility modifiers, standard patterns)
+**Plans**: TBD
+
+Plans:
+- [ ] 12-01: TBD
+
+### Phase 13: Testability & Test Coverage
+**Goal**: Add protocol boundaries on services for dependency injection, make ScanLocationStore injectable (fix UserDefaults pollution in tests), add missing tests for FileScanner, AppState, SyntaxHighlighter, and DiffView
+**Depends on**: Phase 12
+**Research**: Unlikely (standard Swift protocol/DI patterns, XCTest)
+**Plans**: TBD
+
+Plans:
+- [ ] 13-01: TBD
+
+### Phase 14: Code Quality Polish
+**Goal**: Fix logger inconsistencies (static, matching bundle ID subsystem), ByteCountFormatter per-row allocation, remove placeholder test, fix DiffLine.id nondeterminism, deterministic ScanLocation UUIDs
+**Depends on**: Phase 13
+**Research**: Unlikely (internal code quality, no new APIs)
+**Plans**: TBD
+
+Plans:
+- [ ] 14-01: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13 → 14
 
-| Phase | Plans Complete | Status | Completed |
-|-------|---------------|--------|-----------|
-| 1. Foundation | 2/2 | Complete | 2026-02-10 |
-| 2. File Scanner | 3/3 | Complete | 2026-02-10 |
-| 3. Core UI | 3/3 | Complete | 2026-02-10 |
-| 4. Editor | 3/3 | Complete | 2026-02-10 |
-| 5. File Operations | 2/2 | Complete | 2026-02-10 |
-| 6. File Watching | 2/2 | Complete | 2026-02-10 |
-| 7. Cleanup, Export & Polish | 3/3 | Complete | 2026-02-10 |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|---------------|--------|-----------|
+| 1. Foundation | v1.0 | 2/2 | Complete | 2026-02-10 |
+| 2. File Scanner | v1.0 | 3/3 | Complete | 2026-02-10 |
+| 3. Core UI | v1.0 | 3/3 | Complete | 2026-02-10 |
+| 4. Editor | v1.0 | 3/3 | Complete | 2026-02-10 |
+| 5. File Operations | v1.0 | 2/2 | Complete | 2026-02-10 |
+| 6. File Watching | v1.0 | 2/2 | Complete | 2026-02-10 |
+| 7. Cleanup, Export & Polish | v1.0 | 3/3 | Complete | 2026-02-10 |
+| 8. Critical Sandbox & Safety | v1.1 | 0/? | Not started | - |
+| 9. Security Hardening | v1.1 | 0/? | Not started | - |
+| 10. Async & Main Thread Safety | v1.1 | 0/? | Not started | - |
+| 11. FileWatcher FSEvents Rewrite | v1.1 | 0/? | Not started | - |
+| 12. Error Handling & Accessibility | v1.1 | 0/? | Not started | - |
+| 13. Testability & Test Coverage | v1.1 | 0/? | Not started | - |
+| 14. Code Quality Polish | v1.1 | 0/? | Not started | - |
