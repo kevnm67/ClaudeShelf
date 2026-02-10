@@ -20,7 +20,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: File Scanner** - Core scanning engine ported from Go: locations, categories, path decoding, skip rules, depth limits
 - [x] **Phase 3: Core UI** - Three-column NavigationSplitView, sidebar with categories, file list, search, keyboard navigation
 - [x] **Phase 4: Editor** - Syntax-highlighted editor, undo/redo, line numbers, Cmd+S save, diff view, read-only detection
-- [ ] **Phase 5: File Operations** - Permission-preserving save, trash/delete, bulk operations, confirmation dialogs
+- [x] **Phase 5: File Operations** - Permission-preserving save, trash/delete, bulk operations, confirmation dialogs
 - [ ] **Phase 6: File Watching** - FSEvents-based watching, auto-refresh, manual rescan, configurable scan locations
 - [ ] **Phase 7: Cleanup, Export & Polish** - Cleanup analysis & modal, zip export, multiple windows, Quick Look, menu bar, dark/light mode
 
@@ -77,8 +77,8 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 05-01: Permission-preserving save, new file creation with 0600 default
-- [ ] 05-02: Trash delete, permanent delete with confirmation, bulk operations
+- [x] 05-01: Permission-preserving save, new file creation with 0600 default
+- [x] 05-02: Trash delete, permanent delete with confirmation, bulk operations
 
 ### Phase 6: File Watching
 **Goal**: FSEvents-based file watcher that auto-refreshes the file list on disk changes, manual rescan button, and configurable scan locations in Settings
@@ -113,6 +113,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 2. File Scanner | 3/3 | Complete | 2026-02-10 |
 | 3. Core UI | 3/3 | Complete | 2026-02-10 |
 | 4. Editor | 3/3 | Complete | 2026-02-10 |
-| 5. File Operations | 0/2 | Not started | - |
+| 5. File Operations | 2/2 | Complete | 2026-02-10 |
 | 6. File Watching | 0/2 | Not started | - |
 | 7. Cleanup, Export & Polish | 0/3 | Not started | - |
