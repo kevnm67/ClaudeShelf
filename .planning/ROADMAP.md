@@ -21,7 +21,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Core UI** - Three-column NavigationSplitView, sidebar with categories, file list, search, keyboard navigation
 - [x] **Phase 4: Editor** - Syntax-highlighted editor, undo/redo, line numbers, Cmd+S save, diff view, read-only detection
 - [x] **Phase 5: File Operations** - Permission-preserving save, trash/delete, bulk operations, confirmation dialogs
-- [ ] **Phase 6: File Watching** - FSEvents-based watching, auto-refresh, manual rescan, configurable scan locations
+- [x] **Phase 6: File Watching** - FSEvents-based watching, auto-refresh, manual rescan, configurable scan locations
 - [ ] **Phase 7: Cleanup, Export & Polish** - Cleanup analysis & modal, zip export, multiple windows, Quick Look, menu bar, dark/light mode
 
 ## Phase Details
@@ -88,8 +88,8 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 06-01: FSEvents file watcher actor with debouncing
-- [ ] 06-02: Settings view with configurable scan locations, manual rescan
+- [x] 06-01: FSEvents file watcher actor with debouncing
+- [x] 06-02: Settings view with configurable scan locations, manual rescan
 
 ### Phase 7: Cleanup, Export & Polish
 **Goal**: Cleanup tool (empty files, empty content, stale files with modal), zip export, multiple windows, Quick Look integration, complete menu bar, dark/light mode, final polish
@@ -114,5 +114,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 3. Core UI | 3/3 | Complete | 2026-02-10 |
 | 4. Editor | 3/3 | Complete | 2026-02-10 |
 | 5. File Operations | 2/2 | Complete | 2026-02-10 |
-| 6. File Watching | 0/2 | Not started | - |
+| 6. File Watching | 2/2 | Complete | 2026-02-10 |
 | 7. Cleanup, Export & Polish | 0/3 | Not started | - |
