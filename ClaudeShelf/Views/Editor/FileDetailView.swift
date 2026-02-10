@@ -1,4 +1,8 @@
 import SwiftUI
+import os
+
+/// Logger for file save operations.
+private let logger = Logger(subsystem: "com.claudeshelf.app", category: "FileDetailView")
 
 /// Displays a selected Claude configuration file with a metadata header
 /// and an editable code editor.
@@ -7,6 +11,10 @@ import SwiftUI
 /// size, and modification date. Below the header, a ``CodeEditorView`` provides
 /// an NSTextView-based editor with line numbers and monospaced font.
 /// Content is loaded asynchronously and reloads when the selected file changes.
+///
+/// Supports saving with Cmd+S (preserving POSIX permissions), dirty state
+/// tracking with a visual indicator, read-only detection with a banner,
+/// and a diff view for reviewing unsaved changes.
 struct FileDetailView: View {
     let file: FileEntry
 
@@ -14,12 +22,25 @@ struct FileDetailView: View {
     @State private var originalContent: String = ""
     @State private var isLoaded: Bool = false
     @State private var loadError: String?
+    @State private var saveError: String?
+    @State private var showDiff: Bool = false
+
+    /// Whether the editor content differs from the last saved/loaded version.
+    private var isDirty: Bool {
+        isLoaded && fileContent != originalContent
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // MARK: - Metadata Header
             headerView
             Divider()
+
+            // MARK: - Read-Only Banner
+            if file.isReadOnly {
+                readOnlyBanner
+                Divider()
+            }
 
             // MARK: - File Content
             contentView
@@ -28,6 +49,7 @@ struct FileDetailView: View {
         .task(id: file.id) {
             isLoaded = false
             loadError = nil
+            saveError = nil
             fileContent = ""
             originalContent = ""
             do {
@@ -38,7 +60,33 @@ struct FileDetailView: View {
                 isLoaded = true
             } catch {
                 loadError = "Unable to read file contents"
+                logger.error("Failed to load file: \(error.localizedDescription, privacy: .public)")
             }
+        }
+        .alert("Save Error", isPresented: .init(
+            get: { saveError != nil },
+            set: { if !$0 { saveError = nil } }
+        )) {
+            Button("OK", role: .cancel) {
+                saveError = nil
+            }
+        } message: {
+            if let errorMessage = saveError {
+                Text(errorMessage)
+            }
+        }
+        .sheet(isPresented: $showDiff) {
+            DiffView(
+                original: originalContent,
+                modified: fileContent,
+                onSave: {
+                    saveFile()
+                    showDiff = false
+                },
+                onCancel: {
+                    showDiff = false
+                }
+            )
         }
     }
 
@@ -47,7 +95,7 @@ struct FileDetailView: View {
     @ViewBuilder
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // File name and lock icon
+            // File name, lock icon, dirty indicator, and action buttons
             HStack(spacing: 6) {
                 Text(file.displayName)
                     .font(.headline)
@@ -58,6 +106,35 @@ struct FileDetailView: View {
                         .foregroundStyle(.secondary)
                         .font(.caption)
                         .help("This file is read-only")
+                }
+
+                if isDirty {
+                    Circle()
+                        .fill(Color.accentColor)
+                        .frame(width: 8, height: 8)
+                        .help("Unsaved changes")
+                }
+
+                Spacer()
+
+                // Action buttons (only for writable files)
+                if !file.isReadOnly {
+                    if isDirty {
+                        Button {
+                            showDiff = true
+                        } label: {
+                            Label("Review Changes", systemImage: "doc.text.magnifyingglass")
+                        }
+                        .help("Review unsaved changes")
+
+                        Button {
+                            saveFile()
+                        } label: {
+                            Label("Save", systemImage: "square.and.arrow.down")
+                        }
+                        .keyboardShortcut("s", modifiers: .command)
+                        .help("Save file (Cmd+S)")
+                    }
                 }
             }
 
@@ -93,6 +170,23 @@ struct FileDetailView: View {
         .padding()
     }
 
+    // MARK: - Read-Only Banner
+
+    @ViewBuilder
+    private var readOnlyBanner: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "lock.fill")
+                .font(.caption)
+            Text("This file is read-only")
+                .font(.caption)
+        }
+        .foregroundStyle(.secondary)
+        .padding(.horizontal)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.fill.quaternary)
+    }
+
     // MARK: - Content
 
     @ViewBuilder
@@ -115,6 +209,42 @@ struct FileDetailView: View {
         }
     }
 
+    // MARK: - Save
+
+    /// Saves the current editor content to disk, preserving POSIX permissions.
+    ///
+    /// Reads the file's existing permissions before writing, writes content
+    /// atomically, then restores the original permissions. On success, updates
+    /// ``originalContent`` to match ``fileContent``, clearing the dirty state.
+    private func saveFile() {
+        let fileManager = FileManager.default
+
+        do {
+            // Read current POSIX permissions before writing
+            let attributes = try fileManager.attributesOfItem(atPath: file.path)
+            let posixPermissions = attributes[.posixPermissions] as? NSNumber
+
+            // Write content atomically
+            try fileContent.write(toFile: file.path, atomically: true, encoding: .utf8)
+
+            // Restore POSIX permissions
+            if let permissions = posixPermissions {
+                try fileManager.setAttributes(
+                    [.posixPermissions: permissions],
+                    ofItemAtPath: file.path
+                )
+            }
+
+            // Clear dirty state
+            originalContent = fileContent
+
+            logger.info("File saved successfully")
+        } catch {
+            saveError = "Unable to save file. Please check permissions and try again."
+            logger.error("Failed to save file: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
     // MARK: - Computed Properties
 
     /// Human-readable scope label showing "Global" or the project name.
@@ -131,7 +261,7 @@ struct FileDetailView: View {
     }
 }
 
-#Preview {
+#Preview("Editable") {
     FileDetailView(
         file: FileEntry(
             id: FileEntry.generateID(from: "/Users/demo/.claude/CLAUDE.md"),
@@ -144,6 +274,24 @@ struct FileDetailView: View {
             size: 2048,
             modifiedDate: Date().addingTimeInterval(-3600),
             isReadOnly: false
+        )
+    )
+    .frame(width: 600, height: 500)
+}
+
+#Preview("Read-Only") {
+    FileDetailView(
+        file: FileEntry(
+            id: FileEntry.generateID(from: "/Users/demo/.claude/settings.json"),
+            name: "settings.json",
+            path: "/Users/demo/.claude/settings.json",
+            displayName: "Global Settings",
+            category: .settings,
+            scope: .global,
+            project: nil,
+            size: 512,
+            modifiedDate: Date().addingTimeInterval(-7200),
+            isReadOnly: true
         )
     )
     .frame(width: 600, height: 500)
