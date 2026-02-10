@@ -43,7 +43,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 02-01: Scanner core — scan locations, directory walking, skip rules, depth limits
+- [x] 02-01: Scanner core — scan locations, directory walking, skip rules, depth limits
 - [ ] 02-02: File recognition, category assignment (9 categories with priority rules), path decoding, ID generation
 - [ ] 02-03: Scanner integration — AppState wiring, async scanning, error handling
 
@@ -110,7 +110,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete | 2026-02-10 |
-| 2. File Scanner | 0/3 | Not started | - |
+| 2. File Scanner | 1/3 | In progress | - |
 | 3. Core UI | 0/3 | Not started | - |
 | 4. Editor | 0/3 | Not started | - |
 | 5. File Operations | 0/2 | Not started | - |
