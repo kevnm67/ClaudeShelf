@@ -5,21 +5,35 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            Text("Categories")
-                .navigationTitle("ClaudeShelf")
+            SidebarView()
+                .navigationSplitViewColumnWidth(min: 200, ideal: 220)
         } content: {
-            if appState.isScanning {
-                ProgressView("Scanning...")
-            } else {
-                Text("\(appState.filteredFiles.count) files found")
+            Group {
+                if appState.isScanning {
+                    ProgressView("Scanning...")
+                } else if appState.filteredFiles.isEmpty {
+                    ContentUnavailableView {
+                        Label("No Files Found", systemImage: "doc.questionmark")
+                    } description: {
+                        Text("Select a category or adjust your search.")
+                    }
+                } else {
+                    Text("\(appState.filteredFiles.count) files found")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                }
             }
+            .navigationSplitViewColumnWidth(min: 250, ideal: 300)
         } detail: {
             if let errorMessage = appState.errorMessage {
                 Text(errorMessage)
                     .foregroundStyle(.red)
             } else {
-                Text("Select a file to edit")
-                    .foregroundStyle(.secondary)
+                ContentUnavailableView {
+                    Label("No Selection", systemImage: "doc.text")
+                } description: {
+                    Text("Select a file to edit")
+                }
             }
         }
         .frame(minWidth: 800, minHeight: 500)
