@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 import os
 
 /// Logger for bulk file operations.
@@ -21,6 +22,9 @@ struct FileListView: View {
 
     /// Error message from a failed bulk delete operation.
     @State private var bulkDeleteError: String?
+
+    /// Error message from a failed export operation.
+    @State private var exportError: String?
 
     var body: some View {
         @Bindable var appState = appState
@@ -118,6 +122,18 @@ struct FileListView: View {
                 Text(errorMessage)
             }
         }
+        .alert("Export Error", isPresented: .init(
+            get: { exportError != nil },
+            set: { if !$0 { exportError = nil } }
+        )) {
+            Button("OK", role: .cancel) {
+                exportError = nil
+            }
+        } message: {
+            if let errorMessage = exportError {
+                Text(errorMessage)
+            }
+        }
     }
 
     // MARK: - Bulk Selection Bar
@@ -137,6 +153,14 @@ struct FileListView: View {
                 .foregroundStyle(.secondary)
 
             Spacer()
+
+            Button {
+                exportSelectedFiles()
+            } label: {
+                Label("Export", systemImage: "square.and.arrow.up")
+                    .font(.caption)
+            }
+            .disabled(appState.selectedFileIDs.isEmpty)
 
             Button(role: .destructive) {
                 showBulkDeleteConfirmation = true
@@ -190,6 +214,27 @@ struct FileListView: View {
         } catch {
             bulkDeleteError = "Unable to delete files. Please check permissions and try again."
             logger.error("Bulk delete failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    // MARK: - Export
+
+    /// Exports the currently selected files as a zip archive via NSSavePanel.
+    private func exportSelectedFiles() {
+        let filesToExport = appState.selectedFiles
+        guard !filesToExport.isEmpty else { return }
+
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = ExportService.defaultFilename()
+        panel.allowedContentTypes = [.zip]
+
+        panel.begin { response in
+            guard response == .OK, let url = panel.url else { return }
+            do {
+                try ExportService.exportAsZip(files: filesToExport, to: url.path)
+            } catch {
+                exportError = error.localizedDescription
+            }
         }
     }
 
