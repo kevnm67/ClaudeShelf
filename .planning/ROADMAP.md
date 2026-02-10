@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: TBD
 
 Plans:
-- [ ] 01-01: Xcode project setup, targets, build settings, Swift 6 strict concurrency
+- [x] 01-01: Xcode project setup, targets, build settings, Swift 6 strict concurrency
 - [ ] 01-02: Core data models (FileEntry, Category, Scope, ScanLocation) and app architecture scaffolding
 
 ### Phase 2: File Scanner
@@ -109,7 +109,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
-| 1. Foundation | 0/2 | Not started | - |
+| 1. Foundation | 1/2 | In progress | - |
 | 2. File Scanner | 0/3 | Not started | - |
 | 3. Core UI | 0/3 | Not started | - |
 | 4. Editor | 0/3 | Not started | - |
