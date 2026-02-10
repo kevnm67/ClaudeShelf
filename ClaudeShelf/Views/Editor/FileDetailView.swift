@@ -213,32 +213,14 @@ struct FileDetailView: View {
 
     /// Saves the current editor content to disk, preserving POSIX permissions.
     ///
-    /// Reads the file's existing permissions before writing, writes content
-    /// atomically, then restores the original permissions. On success, updates
+    /// Delegates to ``FileOperations/saveFile(at:content:)`` which reads the
+    /// file's existing permissions before writing, writes content atomically,
+    /// then restores the original permissions. On success, updates
     /// ``originalContent`` to match ``fileContent``, clearing the dirty state.
     private func saveFile() {
-        let fileManager = FileManager.default
-
         do {
-            // Read current POSIX permissions before writing
-            let attributes = try fileManager.attributesOfItem(atPath: file.path)
-            let posixPermissions = attributes[.posixPermissions] as? NSNumber
-
-            // Write content atomically
-            try fileContent.write(toFile: file.path, atomically: true, encoding: .utf8)
-
-            // Restore POSIX permissions
-            if let permissions = posixPermissions {
-                try fileManager.setAttributes(
-                    [.posixPermissions: permissions],
-                    ofItemAtPath: file.path
-                )
-            }
-
-            // Clear dirty state
+            try FileOperations.saveFile(at: file.path, content: fileContent)
             originalContent = fileContent
-
-            logger.info("File saved successfully")
         } catch {
             saveError = "Unable to save file. Please check permissions and try again."
             logger.error("Failed to save file: \(error.localizedDescription, privacy: .public)")
