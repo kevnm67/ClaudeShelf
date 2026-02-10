@@ -54,7 +54,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 03-01: Three-column NavigationSplitView layout, sidebar with categories, SF Symbols icons, file counts
+- [x] 03-01: Three-column NavigationSplitView layout, sidebar with categories, SF Symbols icons, file counts
 - [ ] 03-02: File list view with sorting, visual grouping by scope (global vs project)
 - [ ] 03-03: Search (Cmd+F), keyboard shortcuts, basic file content display
 
@@ -111,7 +111,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|---------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete | 2026-02-10 |
 | 2. File Scanner | 3/3 | Complete | 2026-02-10 |
-| 3. Core UI | 0/3 | Not started | - |
+| 3. Core UI | 1/3 | In progress | - |
 | 4. Editor | 0/3 | Not started | - |
 | 5. File Operations | 0/2 | Not started | - |
 | 6. File Watching | 0/2 | Not started | - |
