@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F3000000000000000000002 /* DiffView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3000000000000000000001 /* DiffView.swift */; };
 		F2B2C3D4E5F6A1B2C3D40001 /* SyntaxHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B2C3D4E5F6A1B2C3D41001 /* SyntaxHighlighter.swift */; };
 		F1B2C3D4E5F6A1B2C3D40001 /* CodeEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B2C3D4E5F6A1B2C3D41001 /* CodeEditorView.swift */; };
 		E3B2C3D4E5F6A1B2C3D40001 /* FileDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B2C3D4E5F6A1B2C3D41001 /* FileDetailView.swift */; };
@@ -43,6 +44,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F3000000000000000000001 /* DiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffView.swift; sourceTree = "<group>"; };
 		F2B2C3D4E5F6A1B2C3D41001 /* SyntaxHighlighter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntaxHighlighter.swift; sourceTree = "<group>"; };
 		F1B2C3D4E5F6A1B2C3D41001 /* CodeEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeEditorView.swift; sourceTree = "<group>"; };
 		E3B2C3D4E5F6A1B2C3D41001 /* FileDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDetailView.swift; sourceTree = "<group>"; };
@@ -171,6 +173,7 @@
 			isa = PBXGroup;
 			children = (
 				F1B2C3D4E5F6A1B2C3D41001 /* CodeEditorView.swift */,
+				F3000000000000000000001 /* DiffView.swift */,
 				E3B2C3D4E5F6A1B2C3D41001 /* FileDetailView.swift */,
 			);
 			path = Editor;
@@ -335,6 +338,7 @@
 				E2B2C3D4E5F6A1B2C3D40002 /* FileRowView.swift in Sources */,
 				E3B2C3D4E5F6A1B2C3D40001 /* FileDetailView.swift in Sources */,
 				F1B2C3D4E5F6A1B2C3D40001 /* CodeEditorView.swift in Sources */,
+				F3000000000000000000002 /* DiffView.swift in Sources */,
 				F2B2C3D4E5F6A1B2C3D40001 /* SyntaxHighlighter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
