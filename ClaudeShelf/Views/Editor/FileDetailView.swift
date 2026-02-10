@@ -1,14 +1,18 @@
 import SwiftUI
 
-/// A read-only viewer for a selected Claude configuration file.
+/// Displays a selected Claude configuration file with a metadata header
+/// and an editable code editor.
 ///
-/// Displays a metadata header (name, category, scope, lock status, size, date)
-/// followed by the file's text content in a monospaced font. Content is loaded
-/// asynchronously and reloads when the selected file changes.
+/// The metadata header shows the file's name, category, scope, lock status,
+/// size, and modification date. Below the header, a ``CodeEditorView`` provides
+/// an NSTextView-based editor with line numbers and monospaced font.
+/// Content is loaded asynchronously and reloads when the selected file changes.
 struct FileDetailView: View {
     let file: FileEntry
 
-    @State private var fileContent: String?
+    @State private var fileContent: String = ""
+    @State private var originalContent: String = ""
+    @State private var isLoaded: Bool = false
     @State private var loadError: String?
 
     var body: some View {
@@ -22,11 +26,16 @@ struct FileDetailView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .task(id: file.id) {
-            fileContent = nil
+            isLoaded = false
             loadError = nil
+            fileContent = ""
+            originalContent = ""
             do {
                 let url = URL(fileURLWithPath: file.path)
-                fileContent = try String(contentsOf: url, encoding: .utf8)
+                let content = try String(contentsOf: url, encoding: .utf8)
+                fileContent = content
+                originalContent = content
+                isLoaded = true
             } catch {
                 loadError = "Unable to read file contents"
             }
@@ -88,14 +97,8 @@ struct FileDetailView: View {
 
     @ViewBuilder
     private var contentView: some View {
-        if let content = fileContent {
-            ScrollView([.horizontal, .vertical]) {
-                Text(content)
-                    .font(.system(.body, design: .monospaced))
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                    .padding()
-            }
+        if isLoaded {
+            CodeEditorView(text: $fileContent, isEditable: !file.isReadOnly)
         } else if let error = loadError {
             ContentUnavailableView {
                 Label("Cannot Read File", systemImage: "exclamationmark.triangle")
