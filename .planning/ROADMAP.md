@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation** - Xcode project, app architecture, data models, MVVM scaffolding
 - [x] **Phase 2: File Scanner** - Core scanning engine ported from Go: locations, categories, path decoding, skip rules, depth limits
 - [x] **Phase 3: Core UI** - Three-column NavigationSplitView, sidebar with categories, file list, search, keyboard navigation
-- [ ] **Phase 4: Editor** - Syntax-highlighted editor, undo/redo, line numbers, Cmd+S save, diff view, read-only detection
+- [x] **Phase 4: Editor** - Syntax-highlighted editor, undo/redo, line numbers, Cmd+S save, diff view, read-only detection
 - [ ] **Phase 5: File Operations** - Permission-preserving save, trash/delete, bulk operations, confirmation dialogs
 - [ ] **Phase 6: File Watching** - FSEvents-based watching, auto-refresh, manual rescan, configurable scan locations
 - [ ] **Phase 7: Cleanup, Export & Polish** - Cleanup analysis & modal, zip export, multiple windows, Quick Look, menu bar, dark/light mode
@@ -68,7 +68,7 @@ Plans:
 Plans:
 - [x] 04-01: Text editor foundation — NSTextView bridge or TextKit2 approach, line numbers
 - [x] 04-02: Syntax highlighting for Markdown, JSON, YAML, TOML
-- [ ] 04-03: Undo/redo, Cmd+S save, diff view, read-only detection
+- [x] 04-03: Undo/redo, Cmd+S save, diff view, read-only detection
 
 ### Phase 5: File Operations
 **Goal**: Safe file operations — permission-preserving save (read POSIX before write, restore after), trash as default delete, permanent delete with explicit confirmation, single and bulk delete with confirmation dialogs, new files default to 0600
@@ -112,7 +112,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Foundation | 2/2 | Complete | 2026-02-10 |
 | 2. File Scanner | 3/3 | Complete | 2026-02-10 |
 | 3. Core UI | 3/3 | Complete | 2026-02-10 |
-| 4. Editor | 1/3 | In progress | - |
+| 4. Editor | 3/3 | Complete | 2026-02-10 |
 | 5. File Operations | 0/2 | Not started | - |
 | 6. File Watching | 0/2 | Not started | - |
 | 7. Cleanup, Export & Polish | 0/3 | Not started | - |
