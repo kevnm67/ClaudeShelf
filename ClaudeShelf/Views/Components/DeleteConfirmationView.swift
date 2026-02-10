@@ -91,7 +91,8 @@ struct DeleteConfirmationView: View {
             .padding(.bottom, 8)
         }
         .padding()
-        .frame(width: 400, idealHeight: 350)
+        .frame(width: 400)
+        .frame(idealHeight: 350)
     }
 }
 
