@@ -55,7 +55,7 @@ Plans:
 
 Plans:
 - [x] 03-01: Three-column NavigationSplitView layout, sidebar with categories, SF Symbols icons, file counts
-- [ ] 03-02: File list view with sorting, visual grouping by scope (global vs project)
+- [x] 03-02: File list view with sorting, visual grouping by scope (global vs project)
 - [ ] 03-03: Search (Cmd+F), keyboard shortcuts, basic file content display
 
 ### Phase 4: Editor
