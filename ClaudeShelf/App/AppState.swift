@@ -45,6 +45,9 @@ final class AppState {
     /// The file scanner actor used to discover Claude configuration files.
     private let scanner = FileScanner()
 
+    /// The file watcher actor that monitors directories for changes.
+    private let fileWatcher = FileWatcher()
+
     /// Logger for internal diagnostics.
     private static let logger = Logger(
         subsystem: "com.claudeshelf.app",
@@ -77,6 +80,27 @@ final class AppState {
             // Show user-friendly message, don't expose raw paths
             errorMessage = "Some locations could not be scanned. \(result.errors.count) error(s) occurred."
         }
+    }
+
+    /// Starts file watching on all enabled scan locations.
+    func startFileWatching() async {
+        let directories = scanLocations
+            .filter(\.isEnabled)
+            .map(\.path)
+        await fileWatcher.start(directories: directories) { [weak self] in
+            await self?.performScan()
+        }
+    }
+
+    /// Stops file watching.
+    func stopFileWatching() async {
+        await fileWatcher.stop()
+    }
+
+    /// Restarts file watching (e.g., after scan locations change).
+    func restartFileWatching() async {
+        await stopFileWatching()
+        await startFileWatching()
     }
 
     /// Files filtered by the current category selection and search text.
