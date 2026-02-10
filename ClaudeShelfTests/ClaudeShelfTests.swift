@@ -1,11 +1,9 @@
-import Testing
+import XCTest
 @testable import ClaudeShelf
 
-@Suite("ClaudeShelf Tests")
-struct ClaudeShelfTests {
-    @Test("App launches successfully")
-    func appLaunches() {
+final class ClaudeShelfTests: XCTestCase {
+    func testAppLaunches() {
         // Placeholder test to verify the test target builds
-        #expect(true)
+        XCTAssertTrue(true)
     }
 }
