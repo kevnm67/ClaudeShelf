@@ -24,6 +24,7 @@ struct ContentView: View {
         } detail: {
             detailColumn
         }
+        .navigationTitle("ClaudeShelf")
         .searchable(text: $appState.searchText, prompt: "Search files...")
         .toolbar {
             ToolbarItem(placement: .automatic) {
@@ -39,8 +40,7 @@ struct ContentView: View {
                     } label: {
                         Label("Rescan", systemImage: "arrow.clockwise")
                     }
-                    .keyboardShortcut("r", modifiers: .command)
-                    .help("Rescan for Claude configuration files")
+                    .help("Rescan for Claude configuration files (Cmd+R)")
                 }
             }
             ToolbarItem(placement: .automatic) {
