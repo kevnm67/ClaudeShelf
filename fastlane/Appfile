@@ -1,0 +1,2 @@
+# Minimum Appfile for macOS app
+app_identifier("com.kjm.ClaudeShelf")

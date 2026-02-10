@@ -1,0 +1,50 @@
+default_platform(:mac)
+
+platform :mac do
+  before_all do
+    # Generate Xcode project from project.yml
+    sh("cd .. && xcodegen generate")
+  end
+
+  desc "Run all unit tests"
+  lane :test do
+    run_tests(
+      project: "ClaudeShelf.xcodeproj",
+      scheme: "ClaudeShelf",
+      destination: "platform=macOS",
+      clean: true,
+      code_coverage: true
+    )
+  end
+
+  desc "Build the app (Debug)"
+  lane :build do
+    build_mac_app(
+      project: "ClaudeShelf.xcodeproj",
+      scheme: "ClaudeShelf",
+      configuration: "Debug",
+      skip_codesigning: true,
+      skip_package_pkg: true
+    )
+  end
+
+  desc "Build the app (Release)"
+  lane :build_release do
+    build_mac_app(
+      project: "ClaudeShelf.xcodeproj",
+      scheme: "ClaudeShelf",
+      configuration: "Release",
+      skip_codesigning: true,
+      skip_package_pkg: true
+    )
+  end
+
+  desc "Lint Swift code"
+  lane :lint do
+    swiftlint(
+      mode: :lint,
+      raise_if_swiftlint_error: true,
+      ignore_exit_status: false
+    )
+  end
+end

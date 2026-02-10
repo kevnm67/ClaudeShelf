@@ -1,0 +1,79 @@
+version: 2.1
+
+orbs:
+  macos: circleci/macos@2.5.2
+
+executors:
+  macos-executor:
+    macos:
+      xcode: "16.2.0"
+    resource_class: macos.m1.medium.gen1
+
+commands:
+  install-tools:
+    description: Install XcodeGen and dependencies
+    steps:
+      - run:
+          name: Install XcodeGen
+          command: brew install xcodegen
+      - run:
+          name: Generate Xcode project
+          command: xcodegen generate
+
+  run-tests:
+    description: Build and run unit tests
+    steps:
+      - run:
+          name: Run tests
+          command: |
+            xcodebuild test \
+              -project ClaudeShelf.xcodeproj \
+              -scheme ClaudeShelf \
+              -destination 'platform=macOS' \
+              -resultBundlePath TestResults.xcresult \
+              | xcbeautify || true
+      - store_test_results:
+          path: TestResults.xcresult
+
+jobs:
+  build-and-test:
+    executor: macos-executor
+    steps:
+      - checkout
+      - install-tools
+      - run:
+          name: Build (Debug)
+          command: |
+            xcodebuild build \
+              -project ClaudeShelf.xcodeproj \
+              -scheme ClaudeShelf \
+              -destination 'platform=macOS' \
+              | xcbeautify || true
+      - run-tests
+
+  build-release:
+    executor: macos-executor
+    steps:
+      - checkout
+      - install-tools
+      - run:
+          name: Build (Release)
+          command: |
+            xcodebuild build \
+              -project ClaudeShelf.xcodeproj \
+              -scheme ClaudeShelf \
+              -configuration Release \
+              -destination 'platform=macOS' \
+              | xcbeautify || true
+
+workflows:
+  main:
+    jobs:
+      - build-and-test
+      - build-release:
+          requires:
+            - build-and-test
+          filters:
+            branches:
+              only:
+                - main
