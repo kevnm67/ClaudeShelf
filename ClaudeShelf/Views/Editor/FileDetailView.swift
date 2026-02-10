@@ -98,7 +98,7 @@ struct FileDetailView: View {
     @ViewBuilder
     private var contentView: some View {
         if isLoaded {
-            CodeEditorView(text: $fileContent, isEditable: !file.isReadOnly)
+            CodeEditorView(text: $fileContent, isEditable: !file.isReadOnly, filename: file.name)
         } else if let error = loadError {
             ContentUnavailableView {
                 Label("Cannot Read File", systemImage: "exclamationmark.triangle")

@@ -4,11 +4,13 @@ import AppKit
 /// An NSTextView-based code editor wrapped in NSViewRepresentable.
 ///
 /// Provides a monospaced text editing surface with line numbers in a gutter,
-/// horizontal and vertical scrolling, and undo support. Designed as a drop-in
+/// horizontal and vertical scrolling, undo support, and syntax highlighting
+/// for Markdown, JSON, YAML, and TOML files. Designed as a drop-in
 /// replacement for SwiftUI's TextEditor with macOS-native editor capabilities.
 struct CodeEditorView: NSViewRepresentable {
     @Binding var text: String
     var isEditable: Bool = true
+    var filename: String = ""
     var onTextChange: ((String) -> Void)? = nil
 
     func makeCoordinator() -> Coordinator {
@@ -27,10 +29,13 @@ struct CodeEditorView: NSViewRepresentable {
         textView.isSelectable = true
         textView.allowsUndo = true
         textView.font = .monospacedSystemFont(ofSize: 13, weight: .regular)
-        textView.textColor = .textColor
+        textView.textColor = .labelColor
         textView.backgroundColor = .textBackgroundColor
         textView.textContainerInset = NSSize(width: 8, height: 8)
-        textView.isRichText = false
+
+        // Allow rich text so attributed string styling (syntax highlighting) is rendered,
+        // but disable graphics import to keep it text-only
+        textView.isRichText = true
         textView.importsGraphics = false
 
         // Disable automatic text substitutions for code editing
@@ -50,6 +55,13 @@ struct CodeEditorView: NSViewRepresentable {
             width: CGFloat.greatestFiniteMagnitude,
             height: CGFloat.greatestFiniteMagnitude
         )
+
+        // Set the typing attributes to base monospaced font so new text
+        // typed by the user gets the correct font even in rich text mode
+        textView.typingAttributes = [
+            .font: NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
+            .foregroundColor: NSColor.labelColor,
+        ]
 
         textView.string = text
         textView.delegate = context.coordinator
@@ -73,6 +85,9 @@ struct CodeEditorView: NSViewRepresentable {
         context.coordinator.textView = textView
         context.coordinator.rulerView = rulerView
 
+        // Apply initial syntax highlighting
+        context.coordinator.applyHighlighting()
+
         return scrollView
     }
 
@@ -88,6 +103,7 @@ struct CodeEditorView: NSViewRepresentable {
             context.coordinator.isUpdating = true
             let selectedRanges = textView.selectedRanges
             textView.string = text
+            context.coordinator.applyHighlighting()
             textView.selectedRanges = selectedRanges
             context.coordinator.isUpdating = false
             context.coordinator.rulerView?.needsDisplay = true
@@ -113,7 +129,47 @@ struct CodeEditorView: NSViewRepresentable {
             isUpdating = true
             parent.text = textView.string
             parent.onTextChange?(textView.string)
+            applyHighlighting()
             isUpdating = false
+        }
+
+        /// Applies syntax highlighting to the text storage without changing the text content.
+        ///
+        /// Preserves the cursor position (selectedRanges) across the attribute update
+        /// by saving and restoring them around the batch editing operation.
+        func applyHighlighting() {
+            guard let textView = textView else { return }
+            let text = textView.string
+            guard !text.isEmpty else { return }
+
+            let fileType = SyntaxHighlighter.detectFileType(from: parent.filename)
+            let highlighted = SyntaxHighlighter.highlight(text, for: fileType)
+
+            guard let storage = textView.textStorage else { return }
+            let selectedRanges = textView.selectedRanges
+
+            storage.beginEditing()
+
+            // Clear all existing attributes and apply highlighted ones
+            let fullRange = NSRange(location: 0, length: storage.length)
+            storage.setAttributes([:], range: fullRange)
+            highlighted.enumerateAttributes(
+                in: NSRange(location: 0, length: highlighted.length),
+                options: []
+            ) { attrs, range, _ in
+                storage.setAttributes(attrs, range: range)
+            }
+
+            storage.endEditing()
+
+            // Restore cursor position
+            textView.selectedRanges = selectedRanges
+
+            // Reset typing attributes so newly typed characters use the base style
+            textView.typingAttributes = [
+                .font: NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
+                .foregroundColor: NSColor.labelColor,
+            ]
         }
 
         @objc func handleTextStorageDidProcessEditing(_ notification: Notification) {
@@ -275,13 +331,13 @@ fileprivate final class LineNumberRulerView: NSRulerView {
 
 // MARK: - Preview
 
-#Preview {
+#Preview("Markdown") {
     CodeEditorView(
         text: .constant("""
         # CLAUDE.md
 
         This is a sample configuration file.
-        It demonstrates the code editor with line numbers.
+        It demonstrates **syntax highlighting** in the code editor.
 
         ## Rules
 
@@ -295,8 +351,29 @@ fileprivate final class LineNumberRulerView: NSRulerView {
         swift build
         swift test
         ```
+
+        Visit [Claude](https://claude.ai) for more info.
         """),
-        isEditable: true
+        isEditable: true,
+        filename: "CLAUDE.md"
+    )
+    .frame(width: 600, height: 400)
+}
+
+#Preview("JSON") {
+    CodeEditorView(
+        text: .constant("""
+        {
+          "name": "my-project",
+          "version": "1.0.0",
+          "enabled": true,
+          "count": 42,
+          "tags": ["swift", "macos"],
+          "config": null
+        }
+        """),
+        isEditable: true,
+        filename: "settings.json"
     )
     .frame(width: 600, height: 400)
 }
