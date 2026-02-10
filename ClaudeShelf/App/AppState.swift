@@ -25,8 +25,8 @@ final class AppState {
     /// Whether a scan is currently in progress.
     var isScanning: Bool = false
 
-    /// The configured scan locations.
-    var scanLocations: [ScanLocation] = ScanLocation.defaultLocations
+    /// The configured scan locations (loaded from persisted state on init).
+    var scanLocations: [ScanLocation]
 
     /// When the last scan completed, or nil if no scan has run.
     var lastScanDate: Date? = nil
@@ -53,6 +53,52 @@ final class AppState {
         subsystem: "com.claudeshelf.app",
         category: "AppState"
     )
+
+    // MARK: - Initialization
+
+    init() {
+        self.scanLocations = ScanLocationStore.load(defaults: ScanLocation.defaultLocations)
+    }
+
+    // MARK: - Scan Location Management
+
+    /// Adds a user-specified directory as a new scan location.
+    ///
+    /// Duplicate paths are silently ignored.
+    ///
+    /// - Parameter path: Absolute filesystem path to add.
+    func addScanLocation(path: String) {
+        guard !scanLocations.contains(where: { $0.path == path }) else { return }
+        let location = ScanLocation(userPath: path)
+        scanLocations.append(location)
+        saveScanLocations()
+    }
+
+    /// Removes a user-added scan location by ID.
+    ///
+    /// Default (built-in) locations cannot be removed; they can only be disabled.
+    ///
+    /// - Parameter id: The UUID of the location to remove.
+    func removeScanLocation(id: UUID) {
+        guard let loc = scanLocations.first(where: { $0.id == id }),
+              !loc.isDefault else { return }
+        scanLocations.removeAll { $0.id == id }
+        saveScanLocations()
+    }
+
+    /// Toggles the enabled state of a scan location.
+    ///
+    /// - Parameter id: The UUID of the location to toggle.
+    func toggleScanLocation(id: UUID) {
+        guard let index = scanLocations.firstIndex(where: { $0.id == id }) else { return }
+        scanLocations[index].isEnabled.toggle()
+        saveScanLocations()
+    }
+
+    /// Persists current scan locations to UserDefaults.
+    private func saveScanLocations() {
+        ScanLocationStore.save(scanLocations)
+    }
 
     /// Performs a full scan of all enabled locations.
     ///

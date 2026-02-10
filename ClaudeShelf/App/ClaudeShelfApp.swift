@@ -13,5 +13,10 @@ struct ClaudeShelfApp: App {
                     await appState.startFileWatching()
                 }
         }
+
+        Settings {
+            SettingsView()
+                .environment(appState)
+        }
     }
 }
