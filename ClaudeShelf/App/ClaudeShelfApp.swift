@@ -13,6 +13,14 @@ struct ClaudeShelfApp: App {
                     await appState.startFileWatching()
                 }
         }
+        .commands {
+            CommandGroup(after: .newItem) {
+                Button("Rescan") {
+                    Task { await appState.performScan() }
+                }
+                .keyboardShortcut("r", modifiers: .command)
+            }
+        }
 
         Settings {
             SettingsView()
