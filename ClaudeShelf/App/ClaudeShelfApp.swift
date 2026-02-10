@@ -10,6 +10,7 @@ struct ClaudeShelfApp: App {
                 .environment(appState)
                 .task {
                     await appState.performScan()
+                    await appState.startFileWatching()
                 }
         }
     }
