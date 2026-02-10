@@ -16,7 +16,7 @@ None
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Xcode project, app architecture, data models, MVVM scaffolding
+- [x] **Phase 1: Foundation** - Xcode project, app architecture, data models, MVVM scaffolding
 - [ ] **Phase 2: File Scanner** - Core scanning engine ported from Go: locations, categories, path decoding, skip rules, depth limits
 - [ ] **Phase 3: Core UI** - Three-column NavigationSplitView, sidebar with categories, file list, search, keyboard navigation
 - [ ] **Phase 4: Editor** - Syntax-highlighted editor, undo/redo, line numbers, Cmd+S save, diff view, read-only detection
@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01: Xcode project setup, targets, build settings, Swift 6 strict concurrency
-- [ ] 01-02: Core data models (FileEntry, Category, Scope, ScanLocation) and app architecture scaffolding
+- [x] 01-02: Core data models (FileEntry, Category, Scope, ScanLocation) and app architecture scaffolding
 
 ### Phase 2: File Scanner
 **Goal**: Fully functional file scanner that discovers Claude config files across all scan locations with correct category assignment, path decoding, skip rules, and depth limits — faithfully ported from the Go implementation
@@ -109,7 +109,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
-| 1. Foundation | 1/2 | In progress | - |
+| 1. Foundation | 2/2 | Complete | 2026-02-10 |
 | 2. File Scanner | 0/3 | Not started | - |
 | 3. Core UI | 0/3 | Not started | - |
 | 4. Editor | 0/3 | Not started | - |
