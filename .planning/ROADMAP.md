@@ -66,7 +66,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 04-01: Text editor foundation — NSTextView bridge or TextKit2 approach, line numbers
+- [x] 04-01: Text editor foundation — NSTextView bridge or TextKit2 approach, line numbers
 - [ ] 04-02: Syntax highlighting for Markdown, JSON, YAML, TOML
 - [ ] 04-03: Undo/redo, Cmd+S save, diff view, read-only detection
 
@@ -112,7 +112,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Foundation | 2/2 | Complete | 2026-02-10 |
 | 2. File Scanner | 3/3 | Complete | 2026-02-10 |
 | 3. Core UI | 3/3 | Complete | 2026-02-10 |
-| 4. Editor | 0/3 | Not started | - |
+| 4. Editor | 1/3 | In progress | - |
 | 5. File Operations | 0/2 | Not started | - |
 | 6. File Watching | 0/2 | Not started | - |
 | 7. Cleanup, Export & Polish | 0/3 | Not started | - |
