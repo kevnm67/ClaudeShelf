@@ -1,15 +1,26 @@
 import SwiftUI
+import os
+
+/// Logger for bulk file operations.
+private let logger = Logger(subsystem: "com.claudeshelf.app", category: "FileListView")
 
 /// The content column of the NavigationSplitView showing filtered files
 /// grouped by scope (global first, then project) with sorting controls.
 ///
 /// Selection drives ``AppState/selectedFile`` which populates the
-/// detail column.
+/// detail column. Supports bulk selection mode for multi-file
+/// trash and delete operations.
 struct FileListView: View {
     @Environment(AppState.self) private var appState
 
     /// The current sort order for files within each scope group.
     @State private var sortOrder: SortOrder = .name
+
+    /// Whether the bulk delete confirmation sheet is showing.
+    @State private var showBulkDeleteConfirmation: Bool = false
+
+    /// Error message from a failed bulk delete operation.
+    @State private var bulkDeleteError: String?
 
     var body: some View {
         @Bindable var appState = appState
@@ -22,23 +33,31 @@ struct FileListView: View {
                     Text("No files match the current filter.")
                 }
             } else {
-                List(selection: $appState.selectedFile) {
-                    let grouped = groupedAndSortedFiles
-
-                    if !grouped.global.isEmpty {
-                        Section("Global") {
-                            ForEach(grouped.global) { file in
-                                FileRowView(file: file)
-                                    .tag(Optional(file))
-                            }
-                        }
+                VStack(spacing: 0) {
+                    // Bulk selection toolbar
+                    if appState.isBulkSelectionMode {
+                        bulkSelectionBar
+                        Divider()
                     }
 
-                    if !grouped.project.isEmpty {
-                        Section("Project") {
-                            ForEach(grouped.project) { file in
-                                FileRowView(file: file)
-                                    .tag(Optional(file))
+                    List(selection: $appState.selectedFile) {
+                        let grouped = groupedAndSortedFiles
+
+                        if !grouped.global.isEmpty {
+                            Section("Global") {
+                                ForEach(grouped.global) { file in
+                                    FileRowView(file: file)
+                                        .tag(Optional(file))
+                                }
+                            }
+                        }
+
+                        if !grouped.project.isEmpty {
+                            Section("Project") {
+                                ForEach(grouped.project) { file in
+                                    FileRowView(file: file)
+                                        .tag(Optional(file))
+                                }
                             }
                         }
                     }
@@ -46,6 +65,19 @@ struct FileListView: View {
             }
         }
         .toolbar {
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    if appState.isBulkSelectionMode {
+                        appState.clearSelection()
+                    } else {
+                        appState.isBulkSelectionMode = true
+                    }
+                } label: {
+                    Text(appState.isBulkSelectionMode ? "Done" : "Select")
+                }
+                .help(appState.isBulkSelectionMode ? "Exit selection mode" : "Enter selection mode")
+            }
+
             ToolbarItem(placement: .automatic) {
                 Picker("Sort", selection: $sortOrder) {
                     ForEach(SortOrder.allCases) { order in
@@ -58,6 +90,107 @@ struct FileListView: View {
             }
         }
         .navigationTitle("Files")
+        .sheet(isPresented: $showBulkDeleteConfirmation) {
+            DeleteConfirmationView(
+                files: appState.selectedFiles,
+                onTrash: {
+                    bulkTrash()
+                    showBulkDeleteConfirmation = false
+                },
+                onPermanentDelete: {
+                    bulkPermanentDelete()
+                    showBulkDeleteConfirmation = false
+                },
+                onCancel: {
+                    showBulkDeleteConfirmation = false
+                }
+            )
+        }
+        .alert("Delete Error", isPresented: .init(
+            get: { bulkDeleteError != nil },
+            set: { if !$0 { bulkDeleteError = nil } }
+        )) {
+            Button("OK", role: .cancel) {
+                bulkDeleteError = nil
+            }
+        } message: {
+            if let errorMessage = bulkDeleteError {
+                Text(errorMessage)
+            }
+        }
+    }
+
+    // MARK: - Bulk Selection Bar
+
+    @ViewBuilder
+    private var bulkSelectionBar: some View {
+        HStack(spacing: 12) {
+            Button {
+                appState.selectAllFiltered()
+            } label: {
+                Text("Select All")
+                    .font(.caption)
+            }
+
+            Text("\(appState.selectedFileIDs.count) selected")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            Spacer()
+
+            Button(role: .destructive) {
+                showBulkDeleteConfirmation = true
+            } label: {
+                Label("Delete", systemImage: "trash")
+                    .font(.caption)
+            }
+            .disabled(appState.selectedFileIDs.isEmpty)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 6)
+        .background(.fill.quaternary)
+    }
+
+    // MARK: - Bulk Operations
+
+    /// Moves all selected files to Trash.
+    private func bulkTrash() {
+        let filesToTrash = appState.selectedFiles
+        let paths = filesToTrash.map(\.path)
+        do {
+            try FileOperations.trashFiles(at: paths)
+            appState.removeFiles(filesToTrash)
+            appState.clearSelection()
+        } catch let error as FileOperationError {
+            appState.removeFiles(appState.selectedFiles.filter { file in
+                !FileManager.default.fileExists(atPath: file.path)
+            })
+            bulkDeleteError = error.errorDescription
+            logger.error("Bulk trash partial failure: \(error.localizedDescription, privacy: .public)")
+        } catch {
+            bulkDeleteError = "Unable to move files to Trash. Please check permissions and try again."
+            logger.error("Bulk trash failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// Permanently deletes all selected files.
+    private func bulkPermanentDelete() {
+        let filesToDelete = appState.selectedFiles
+        let paths = filesToDelete.map(\.path)
+        do {
+            try FileOperations.permanentlyDeleteFiles(at: paths)
+            appState.removeFiles(filesToDelete)
+            appState.clearSelection()
+        } catch let error as FileOperationError {
+            appState.removeFiles(appState.selectedFiles.filter { file in
+                !FileManager.default.fileExists(atPath: file.path)
+            })
+            bulkDeleteError = error.errorDescription
+            logger.error("Bulk delete partial failure: \(error.localizedDescription, privacy: .public)")
+        } catch {
+            bulkDeleteError = "Unable to delete files. Please check permissions and try again."
+            logger.error("Bulk delete failed: \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     // MARK: - Grouping & Sorting

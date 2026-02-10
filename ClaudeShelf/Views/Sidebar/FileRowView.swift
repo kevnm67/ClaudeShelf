@@ -2,11 +2,32 @@ import SwiftUI
 
 /// A single row in the file list showing a file's category icon,
 /// display name, filename, size, modification date, and read-only status.
+///
+/// In bulk selection mode, displays a checkbox at the leading edge.
+/// Provides a context menu for quick trash and selection actions.
 struct FileRowView: View {
     let file: FileEntry
 
+    @Environment(AppState.self) private var appState
+
+    /// Whether this file is currently selected in bulk mode.
+    private var isSelected: Bool {
+        appState.selectedFileIDs.contains(file.id)
+    }
+
     var body: some View {
         HStack(spacing: 8) {
+            // Bulk selection checkbox
+            if appState.isBulkSelectionMode {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.body)
+                    .foregroundStyle(isSelected ? Color.accentColor : .secondary)
+                    .frame(width: 20, alignment: .center)
+                    .onTapGesture {
+                        appState.toggleFileSelection(file.id)
+                    }
+            }
+
             Image(systemName: file.category.sfSymbol)
                 .font(.body)
                 .foregroundStyle(.secondary)
@@ -46,6 +67,26 @@ struct FileRowView: View {
             }
         }
         .padding(.vertical, 2)
+        .contextMenu {
+            Button {
+                if !appState.isBulkSelectionMode {
+                    appState.isBulkSelectionMode = true
+                }
+                appState.toggleFileSelection(file.id)
+            } label: {
+                Label("Select", systemImage: "checkmark.circle")
+            }
+
+            Divider()
+
+            if !file.isReadOnly {
+                Button(role: .destructive) {
+                    trashFile()
+                } label: {
+                    Label("Move to Trash", systemImage: "trash")
+                }
+            }
+        }
     }
 
     /// File size formatted using ByteCountFormatter with file count style.
@@ -53,6 +94,16 @@ struct FileRowView: View {
         let formatter = ByteCountFormatter()
         formatter.countStyle = .file
         return formatter.string(fromByteCount: file.size)
+    }
+
+    /// Moves this file to the Trash via context menu.
+    private func trashFile() {
+        do {
+            try FileOperations.trashFile(at: file.path)
+            appState.removeFiles([file])
+        } catch {
+            // Error is logged by FileOperations; UI feedback handled at list level
+        }
     }
 }
 
@@ -85,4 +136,5 @@ struct FileRowView: View {
         ))
     }
     .frame(width: 300)
+    .environment(AppState())
 }

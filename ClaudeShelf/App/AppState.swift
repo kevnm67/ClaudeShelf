@@ -34,6 +34,14 @@ final class AppState {
     /// An error message to display to the user, or nil.
     var errorMessage: String? = nil
 
+    // MARK: - Bulk Selection
+
+    /// The IDs of files currently selected for bulk operations.
+    var selectedFileIDs: Set<String> = []
+
+    /// Whether the user is in bulk selection mode.
+    var isBulkSelectionMode: Bool = false
+
     /// The file scanner actor used to discover Claude configuration files.
     private let scanner = FileScanner()
 
@@ -98,6 +106,47 @@ final class AppState {
     var categorySizes: [Category: Int64] {
         Dictionary(grouping: files, by: \.category).mapValues { entries in
             entries.reduce(0) { $0 + $1.size }
+        }
+    }
+
+    // MARK: - Bulk Selection
+
+    /// Toggles selection state for a file ID in bulk mode.
+    func toggleFileSelection(_ fileID: String) {
+        if selectedFileIDs.contains(fileID) {
+            selectedFileIDs.remove(fileID)
+        } else {
+            selectedFileIDs.insert(fileID)
+        }
+    }
+
+    /// Selects all files that match the current filter.
+    func selectAllFiltered() {
+        selectedFileIDs = Set(filteredFiles.map(\.id))
+    }
+
+    /// Clears all selected IDs and exits bulk selection mode.
+    func clearSelection() {
+        selectedFileIDs.removeAll()
+        isBulkSelectionMode = false
+    }
+
+    /// The FileEntry objects corresponding to the currently selected IDs.
+    var selectedFiles: [FileEntry] {
+        files.filter { selectedFileIDs.contains($0.id) }
+    }
+
+    /// Removes entries from the files array, clears them from the selection,
+    /// and clears the selected file if it was among the removed entries.
+    ///
+    /// - Parameter entries: The file entries to remove.
+    func removeFiles(_ entries: [FileEntry]) {
+        let idsToRemove = Set(entries.map(\.id))
+        files.removeAll { idsToRemove.contains($0.id) }
+        selectedFileIDs.subtract(idsToRemove)
+
+        if let selected = selectedFile, idsToRemove.contains(selected.id) {
+            selectedFile = nil
         }
     }
 }

@@ -18,12 +18,16 @@ private let logger = Logger(subsystem: "com.claudeshelf.app", category: "FileDet
 struct FileDetailView: View {
     let file: FileEntry
 
+    @Environment(AppState.self) private var appState
+
     @State private var fileContent: String = ""
     @State private var originalContent: String = ""
     @State private var isLoaded: Bool = false
     @State private var loadError: String?
     @State private var saveError: String?
     @State private var showDiff: Bool = false
+    @State private var showDeleteConfirmation: Bool = false
+    @State private var deleteError: String?
 
     /// Whether the editor content differs from the last saved/loaded version.
     private var isDirty: Bool {
@@ -88,6 +92,34 @@ struct FileDetailView: View {
                 }
             )
         }
+        .sheet(isPresented: $showDeleteConfirmation) {
+            DeleteConfirmationView(
+                files: [file],
+                onTrash: {
+                    trashCurrentFile()
+                    showDeleteConfirmation = false
+                },
+                onPermanentDelete: {
+                    permanentlyDeleteCurrentFile()
+                    showDeleteConfirmation = false
+                },
+                onCancel: {
+                    showDeleteConfirmation = false
+                }
+            )
+        }
+        .alert("Delete Error", isPresented: .init(
+            get: { deleteError != nil },
+            set: { if !$0 { deleteError = nil } }
+        )) {
+            Button("OK", role: .cancel) {
+                deleteError = nil
+            }
+        } message: {
+            if let errorMessage = deleteError {
+                Text(errorMessage)
+            }
+        }
     }
 
     // MARK: - Header
@@ -135,6 +167,13 @@ struct FileDetailView: View {
                         .keyboardShortcut("s", modifiers: .command)
                         .help("Save file (Cmd+S)")
                     }
+
+                    Button(role: .destructive) {
+                        showDeleteConfirmation = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                    .help("Move to Trash or permanently delete")
                 }
             }
 
@@ -227,6 +266,30 @@ struct FileDetailView: View {
         }
     }
 
+    // MARK: - Delete
+
+    /// Moves the current file to Trash and removes it from the app state.
+    private func trashCurrentFile() {
+        do {
+            try FileOperations.trashFile(at: file.path)
+            appState.removeFiles([file])
+        } catch {
+            deleteError = "Unable to move file to Trash. Please check permissions and try again."
+            logger.error("Failed to trash file: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// Permanently deletes the current file and removes it from the app state.
+    private func permanentlyDeleteCurrentFile() {
+        do {
+            try FileOperations.permanentlyDeleteFile(at: file.path)
+            appState.removeFiles([file])
+        } catch {
+            deleteError = "Unable to delete file. Please check permissions and try again."
+            logger.error("Failed to permanently delete file: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
     // MARK: - Computed Properties
 
     /// Human-readable scope label showing "Global" or the project name.
@@ -259,6 +322,7 @@ struct FileDetailView: View {
         )
     )
     .frame(width: 600, height: 500)
+    .environment(AppState())
 }
 
 #Preview("Read-Only") {
@@ -277,4 +341,5 @@ struct FileDetailView: View {
         )
     )
     .frame(width: 600, height: 500)
+    .environment(AppState())
 }
