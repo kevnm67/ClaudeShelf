@@ -94,6 +94,67 @@ actor FileScanner {
         return (allFiles, duration, allErrors)
     }
 
+    /// Performs a full scan across all enabled locations and returns categorized
+    /// ``FileEntry`` objects with category, scope, and project name assigned.
+    ///
+    /// This wraps ``scanLocations(_:)`` and converts each ``DiscoveredFile``
+    /// into a ``FileEntry`` using ``CategoryAssigner`` and ``PathDecoder``.
+    /// Duplicate files (same path found via multiple scan locations) are removed.
+    ///
+    /// - Parameter locations: The scan locations to enumerate.
+    /// - Returns: A ``ScanResult`` containing the discovered file entries.
+    func scan(locations: [ScanLocation]) async -> ScanResult {
+        let homeDir = FileManager.default.homeDirectoryForCurrentUser.path
+
+        let result = await scanLocations(locations)
+
+        var entries: [FileEntry] = []
+        entries.reserveCapacity(result.files.count)
+
+        for file in result.files {
+            let category = CategoryAssigner.assignCategory(
+                fileName: file.name,
+                path: file.url.path,
+                isInsideClaude: file.isInsideClaude
+            )
+
+            let (scope, project) = PathDecoder.detectScope(
+                for: file.url.path,
+                homeDirectory: homeDir
+            )
+
+            let displayName = PathDecoder.displayName(
+                for: file.name,
+                project: project
+            )
+
+            let entry = FileEntry(
+                id: FileEntry.generateID(from: file.url.path),
+                name: file.name,
+                path: file.url.path,
+                displayName: displayName,
+                category: category,
+                scope: scope,
+                project: project,
+                size: file.size,
+                modifiedDate: file.modifiedDate,
+                isReadOnly: file.isReadOnly
+            )
+            entries.append(entry)
+        }
+
+        // Deduplicate by path — same file could be found via multiple scan locations.
+        var seen = Set<String>()
+        entries = entries.filter { seen.insert($0.path).inserted }
+
+        return ScanResult(
+            files: entries,
+            scanDate: Date(),
+            duration: result.duration,
+            errors: result.errors
+        )
+    }
+
     // MARK: - Private
 
     /// Recursively scans a directory for Claude configuration files.
