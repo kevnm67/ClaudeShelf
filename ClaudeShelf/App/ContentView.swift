@@ -11,16 +11,8 @@ struct ContentView: View {
             Group {
                 if appState.isScanning {
                     ProgressView("Scanning...")
-                } else if appState.filteredFiles.isEmpty {
-                    ContentUnavailableView {
-                        Label("No Files Found", systemImage: "doc.questionmark")
-                    } description: {
-                        Text("Select a category or adjust your search.")
-                    }
                 } else {
-                    Text("\(appState.filteredFiles.count) files found")
-                        .font(.headline)
-                        .foregroundStyle(.secondary)
+                    FileListView()
                 }
             }
             .navigationSplitViewColumnWidth(min: 250, ideal: 300)
