@@ -1,8 +1,10 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ContentView: View {
     @Environment(AppState.self) private var appState
     @State private var showCleanup = false
+    @State private var exportError: String?
 
     var body: some View {
         @Bindable var appState = appState
@@ -49,11 +51,49 @@ struct ContentView: View {
                 }
                 .help("Analyze files for cleanup")
             }
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    exportFiles()
+                } label: {
+                    Label("Export", systemImage: "square.and.arrow.up")
+                }
+                .disabled(appState.filteredFiles.isEmpty)
+                .help("Export filtered files as zip archive")
+            }
         }
         .sheet(isPresented: $showCleanup) {
             CleanupSheet()
         }
+        .alert("Export Error", isPresented: .init(
+            get: { exportError != nil },
+            set: { if !$0 { exportError = nil } }
+        )) {
+            Button("OK", role: .cancel) {
+                exportError = nil
+            }
+        } message: {
+            if let errorMessage = exportError {
+                Text(errorMessage)
+            }
+        }
         .frame(minWidth: 800, minHeight: 500)
+    }
+
+    // MARK: - Export
+
+    private func exportFiles() {
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = ExportService.defaultFilename()
+        panel.allowedContentTypes = [.zip]
+
+        panel.begin { response in
+            guard response == .OK, let url = panel.url else { return }
+            do {
+                try ExportService.exportAsZip(files: appState.filteredFiles, to: url.path)
+            } catch {
+                exportError = error.localizedDescription
+            }
+        }
     }
 
     // MARK: - Detail Column
