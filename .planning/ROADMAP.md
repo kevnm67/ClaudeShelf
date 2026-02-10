@@ -67,7 +67,7 @@ Plans:
 
 Plans:
 - [x] 04-01: Text editor foundation — NSTextView bridge or TextKit2 approach, line numbers
-- [ ] 04-02: Syntax highlighting for Markdown, JSON, YAML, TOML
+- [x] 04-02: Syntax highlighting for Markdown, JSON, YAML, TOML
 - [ ] 04-03: Undo/redo, Cmd+S save, diff view, read-only detection
 
 ### Phase 5: File Operations
