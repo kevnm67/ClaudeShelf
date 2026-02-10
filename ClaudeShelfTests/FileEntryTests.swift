@@ -6,7 +6,7 @@ final class FileEntryTests: XCTestCase {
     // MARK: - ID Generation
 
     func testIDLength() {
-        let id = FileEntry.generateID(from: "/Users/kevin/.claude/settings.json")
+        let id = FileEntry.generateID(from: "/Users/testuser/.claude/settings.json")
         XCTAssertEqual(id.count, 16, "ID should be 16 hex characters (8 bytes)")
     }
 
@@ -32,8 +32,8 @@ final class FileEntryTests: XCTestCase {
 
     func testIDDifferentPathsSamePrefix() {
         // Paths that share a long prefix should still produce different IDs
-        let id1 = FileEntry.generateID(from: "/Users/kevin/.claude/projects/-Users-kevin-code-MyApp/settings.json")
-        let id2 = FileEntry.generateID(from: "/Users/kevin/.claude/projects/-Users-kevin-code-MyApp/config.json")
+        let id1 = FileEntry.generateID(from: "/Users/testuser/.claude/projects/-Users-testuser-code-MyApp/settings.json")
+        let id2 = FileEntry.generateID(from: "/Users/testuser/.claude/projects/-Users-testuser-code-MyApp/config.json")
         XCTAssertNotEqual(id1, id2)
     }
 

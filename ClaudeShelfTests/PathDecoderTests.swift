@@ -11,10 +11,10 @@ final class PathDecoderTests: XCTestCase {
     }
 
     func testUsersPath() {
-        // "-Users-kevin-code-my-tool" splits as [Users, kevin, code, my, tool]
-        // "Users" and "code" are common prefixes, "kevin" is not, "my" is not, "tool" is not.
+        // "-Users-testuser-code-my-tool" splits as [Users, testuser, code, my, tool]
+        // "Users" and "code" are common prefixes, "testuser" is not, "my" is not, "tool" is not.
         // Last meaningful segment is "tool".
-        let name = PathDecoder.decodeProjectName(from: "-Users-kevin-code-my-tool")
+        let name = PathDecoder.decodeProjectName(from: "-Users-testuser-code-my-tool")
         XCTAssertEqual(name, "tool")
     }
 
@@ -27,7 +27,7 @@ final class PathDecoderTests: XCTestCase {
 
     func testMultipleMeaningfulSegments() {
         // Both "workspace-tools" and "MyProject" are meaningful; last wins.
-        let name = PathDecoder.decodeProjectName(from: "-Users-kevin-workspace-tools-MyProject")
+        let name = PathDecoder.decodeProjectName(from: "-Users-testuser-workspace-tools-MyProject")
         XCTAssertEqual(name, "MyProject")
     }
 
@@ -38,13 +38,13 @@ final class PathDecoderTests: XCTestCase {
     }
 
     func testGithubPath() {
-        let name = PathDecoder.decodeProjectName(from: "-Users-kevin-Github-ClaudeShelf")
+        let name = PathDecoder.decodeProjectName(from: "-Users-testuser-Github-ClaudeShelf")
         XCTAssertEqual(name, "ClaudeShelf")
     }
 
     func testSingleCharSegmentsFiltered() {
         // "C" is a single char (drive letter), should be filtered out.
-        let name = PathDecoder.decodeProjectName(from: "-C-Users-kevin-Projects-MyApp")
+        let name = PathDecoder.decodeProjectName(from: "-C-Users-testuser-Projects-MyApp")
         XCTAssertEqual(name, "MyApp")
     }
 
@@ -52,8 +52,8 @@ final class PathDecoderTests: XCTestCase {
 
     func testProjectScopeViaProjects() {
         let (scope, project) = PathDecoder.detectScope(
-            for: "/Users/kevin/.claude/projects/-Users-kevin-code-MyApp/settings.json",
-            homeDirectory: "/Users/kevin"
+            for: "/Users/testuser/.claude/projects/-Users-testuser-code-MyApp/settings.json",
+            homeDirectory: "/Users/testuser"
         )
         XCTAssertEqual(scope, .project)
         XCTAssertEqual(project, "MyApp")
@@ -61,8 +61,8 @@ final class PathDecoderTests: XCTestCase {
 
     func testGlobalScope() {
         let (scope, project) = PathDecoder.detectScope(
-            for: "/Users/kevin/.claude/settings.json",
-            homeDirectory: "/Users/kevin"
+            for: "/Users/testuser/.claude/settings.json",
+            homeDirectory: "/Users/testuser"
         )
         XCTAssertEqual(scope, .global)
         XCTAssertNil(project)
@@ -71,8 +71,8 @@ final class PathDecoderTests: XCTestCase {
     func testProjectScopeViaNestedClaude() {
         // .claude/ inside a project directory (not under ~/.claude)
         let (scope, project) = PathDecoder.detectScope(
-            for: "/Users/kevin/projects/MyApp/.claude/settings.json",
-            homeDirectory: "/Users/kevin"
+            for: "/Users/testuser/projects/MyApp/.claude/settings.json",
+            homeDirectory: "/Users/testuser"
         )
         XCTAssertEqual(scope, .project)
         XCTAssertEqual(project, "MyApp")
@@ -81,8 +81,8 @@ final class PathDecoderTests: XCTestCase {
     func testProjectScopeViaClaudeMd() {
         // CLAUDE.md at project root (not inside .claude/)
         let (scope, project) = PathDecoder.detectScope(
-            for: "/Users/kevin/projects/MyApp/CLAUDE.md",
-            homeDirectory: "/Users/kevin"
+            for: "/Users/testuser/projects/MyApp/CLAUDE.md",
+            homeDirectory: "/Users/testuser"
         )
         XCTAssertEqual(scope, .project)
         XCTAssertEqual(project, "MyApp")
@@ -91,8 +91,8 @@ final class PathDecoderTests: XCTestCase {
     func testGlobalScopeForNonClaudeMd() {
         // A random file not inside .claude and not CLAUDE.md
         let (scope, project) = PathDecoder.detectScope(
-            for: "/Users/kevin/.clauderc",
-            homeDirectory: "/Users/kevin"
+            for: "/Users/testuser/.clauderc",
+            homeDirectory: "/Users/testuser"
         )
         XCTAssertEqual(scope, .global)
         XCTAssertNil(project)
@@ -101,8 +101,8 @@ final class PathDecoderTests: XCTestCase {
     func testHomeDirectoryWithTrailingSlash() {
         // Home directory with trailing slash should still work
         let (scope, project) = PathDecoder.detectScope(
-            for: "/Users/kevin/.claude/settings.json",
-            homeDirectory: "/Users/kevin/"
+            for: "/Users/testuser/.claude/settings.json",
+            homeDirectory: "/Users/testuser/"
         )
         XCTAssertEqual(scope, .global)
         XCTAssertNil(project)
