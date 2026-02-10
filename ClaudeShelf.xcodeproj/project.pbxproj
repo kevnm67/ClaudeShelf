@@ -11,6 +11,12 @@
 		A1B2C3D4E5F6A1B2C3D40002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A1B2C3D41002 /* ContentView.swift */; };
 		A1B2C3D4E5F6A1B2C3D40003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A1B2C3D41003 /* Assets.xcassets */; };
 		A1B2C3D4E5F6A1B2C3D40004 /* ClaudeShelfTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A1B2C3D41004 /* ClaudeShelfTests.swift */; };
+		B1B2C3D4E5F6A1B2C3D40001 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B2C3D4E5F6A1B2C3D41001 /* Category.swift */; };
+		B1B2C3D4E5F6A1B2C3D40002 /* Scope.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B2C3D4E5F6A1B2C3D41002 /* Scope.swift */; };
+		B1B2C3D4E5F6A1B2C3D40003 /* FileEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B2C3D4E5F6A1B2C3D41003 /* FileEntry.swift */; };
+		B1B2C3D4E5F6A1B2C3D40004 /* ScanLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B2C3D4E5F6A1B2C3D41004 /* ScanLocation.swift */; };
+		B1B2C3D4E5F6A1B2C3D40005 /* ScanResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B2C3D4E5F6A1B2C3D41005 /* ScanResult.swift */; };
+		B1B2C3D4E5F6A1B2C3D40006 /* CleanupItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B2C3D4E5F6A1B2C3D41006 /* CleanupItem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,6 +38,12 @@
 		A1B2C3D4E5F6A1B2C3D41006 /* ClaudeShelf.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ClaudeShelf.entitlements; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A1B2C3D4A001 /* ClaudeShelf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClaudeShelf.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1B2C3D4E5F6A1B2C3D4A002 /* ClaudeShelfTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClaudeShelfTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B1B2C3D4E5F6A1B2C3D41001 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
+		B1B2C3D4E5F6A1B2C3D41002 /* Scope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scope.swift; sourceTree = "<group>"; };
+		B1B2C3D4E5F6A1B2C3D41003 /* FileEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileEntry.swift; sourceTree = "<group>"; };
+		B1B2C3D4E5F6A1B2C3D41004 /* ScanLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanLocation.swift; sourceTree = "<group>"; };
+		B1B2C3D4E5F6A1B2C3D41005 /* ScanResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanResult.swift; sourceTree = "<group>"; };
+		B1B2C3D4E5F6A1B2C3D41006 /* CleanupItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanupItem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +100,12 @@
 		A1B2C3D4E5F6A1B2C3D45004 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				B1B2C3D4E5F6A1B2C3D41001 /* Category.swift */,
+				B1B2C3D4E5F6A1B2C3D41002 /* Scope.swift */,
+				B1B2C3D4E5F6A1B2C3D41003 /* FileEntry.swift */,
+				B1B2C3D4E5F6A1B2C3D41004 /* ScanLocation.swift */,
+				B1B2C3D4E5F6A1B2C3D41005 /* ScanResult.swift */,
+				B1B2C3D4E5F6A1B2C3D41006 /* CleanupItem.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -263,6 +281,12 @@
 			files = (
 				A1B2C3D4E5F6A1B2C3D40001 /* ClaudeShelfApp.swift in Sources */,
 				A1B2C3D4E5F6A1B2C3D40002 /* ContentView.swift in Sources */,
+				B1B2C3D4E5F6A1B2C3D40001 /* Category.swift in Sources */,
+				B1B2C3D4E5F6A1B2C3D40002 /* Scope.swift in Sources */,
+				B1B2C3D4E5F6A1B2C3D40003 /* FileEntry.swift in Sources */,
+				B1B2C3D4E5F6A1B2C3D40004 /* ScanLocation.swift in Sources */,
+				B1B2C3D4E5F6A1B2C3D40005 /* ScanResult.swift in Sources */,
+				B1B2C3D4E5F6A1B2C3D40006 /* CleanupItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
