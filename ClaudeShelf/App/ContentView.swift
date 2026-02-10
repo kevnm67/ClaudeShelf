@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(AppState.self) private var appState
+    @State private var showCleanup = false
 
     var body: some View {
         @Bindable var appState = appState
@@ -40,6 +41,17 @@ struct ContentView: View {
                     .help("Rescan for Claude configuration files")
                 }
             }
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    showCleanup = true
+                } label: {
+                    Label("Cleanup", systemImage: "wand.and.stars")
+                }
+                .help("Analyze files for cleanup")
+            }
+        }
+        .sheet(isPresented: $showCleanup) {
+            CleanupSheet()
         }
         .frame(minWidth: 800, minHeight: 500)
     }
