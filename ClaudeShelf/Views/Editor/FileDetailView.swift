@@ -1,4 +1,5 @@
 import SwiftUI
+import QuickLook
 import os
 
 /// Logger for file save operations.
@@ -28,6 +29,7 @@ struct FileDetailView: View {
     @State private var showDiff: Bool = false
     @State private var showDeleteConfirmation: Bool = false
     @State private var deleteError: String?
+    @State private var quickLookURL: URL?
 
     /// Whether the editor content differs from the last saved/loaded version.
     private var isDirty: Bool {
@@ -120,6 +122,7 @@ struct FileDetailView: View {
                 Text(errorMessage)
             }
         }
+        .quickLookPreview($quickLookURL)
     }
 
     // MARK: - Header
@@ -148,6 +151,14 @@ struct FileDetailView: View {
                 }
 
                 Spacer()
+
+                // Quick Look preview button
+                Button {
+                    quickLookURL = URL(fileURLWithPath: file.path)
+                } label: {
+                    Label("Preview", systemImage: "eye")
+                }
+                .help("Preview file with Quick Look")
 
                 // Action buttons (only for writable files)
                 if !file.isReadOnly {
