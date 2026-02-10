@@ -22,7 +22,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Editor** - Syntax-highlighted editor, undo/redo, line numbers, Cmd+S save, diff view, read-only detection
 - [x] **Phase 5: File Operations** - Permission-preserving save, trash/delete, bulk operations, confirmation dialogs
 - [x] **Phase 6: File Watching** - FSEvents-based watching, auto-refresh, manual rescan, configurable scan locations
-- [ ] **Phase 7: Cleanup, Export & Polish** - Cleanup analysis & modal, zip export, multiple windows, Quick Look, menu bar, dark/light mode
+- [x] **Phase 7: Cleanup, Export & Polish** - Cleanup analysis & modal, zip export, multiple windows, Quick Look, menu bar, dark/light mode
 
 ## Phase Details
 
@@ -98,9 +98,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 07-01: Cleanup analyzer (empty, empty-content, stale) and cleanup modal UI
-- [ ] 07-02: Zip export of selected files
-- [ ] 07-03: Multiple windows, Quick Look (spacebar preview), menu bar, dark/light mode, final polish
+- [x] 07-01: Cleanup analyzer (empty, empty-content, stale) and cleanup modal UI
+- [x] 07-02: Zip export of selected files
+- [x] 07-03: Multiple windows, Quick Look (spacebar preview), menu bar, dark/light mode, final polish
 
 ## Progress
 
@@ -115,4 +115,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. Editor | 3/3 | Complete | 2026-02-10 |
 | 5. File Operations | 2/2 | Complete | 2026-02-10 |
 | 6. File Watching | 2/2 | Complete | 2026-02-10 |
-| 7. Cleanup, Export & Polish | 0/3 | Not started | - |
+| 7. Cleanup, Export & Polish | 3/3 | Complete | 2026-02-10 |
