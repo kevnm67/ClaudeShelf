@@ -8,10 +8,19 @@ struct ContentView: View {
             Text("Categories")
                 .navigationTitle("ClaudeShelf")
         } content: {
-            Text("\(appState.filteredFiles.count) files")
+            if appState.isScanning {
+                ProgressView("Scanning...")
+            } else {
+                Text("\(appState.filteredFiles.count) files found")
+            }
         } detail: {
-            Text("Select a file to edit")
-                .foregroundStyle(.secondary)
+            if let errorMessage = appState.errorMessage {
+                Text(errorMessage)
+                    .foregroundStyle(.red)
+            } else {
+                Text("Select a file to edit")
+                    .foregroundStyle(.secondary)
+            }
         }
         .frame(minWidth: 800, minHeight: 500)
     }

@@ -17,7 +17,7 @@ None
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Xcode project, app architecture, data models, MVVM scaffolding
-- [ ] **Phase 2: File Scanner** - Core scanning engine ported from Go: locations, categories, path decoding, skip rules, depth limits
+- [x] **Phase 2: File Scanner** - Core scanning engine ported from Go: locations, categories, path decoding, skip rules, depth limits
 - [ ] **Phase 3: Core UI** - Three-column NavigationSplitView, sidebar with categories, file list, search, keyboard navigation
 - [ ] **Phase 4: Editor** - Syntax-highlighted editor, undo/redo, line numbers, Cmd+S save, diff view, read-only detection
 - [ ] **Phase 5: File Operations** - Permission-preserving save, trash/delete, bulk operations, confirmation dialogs
@@ -45,7 +45,7 @@ Plans:
 Plans:
 - [x] 02-01: Scanner core — scan locations, directory walking, skip rules, depth limits
 - [x] 02-02: File recognition, category assignment (9 categories with priority rules), path decoding, ID generation
-- [ ] 02-03: Scanner integration — AppState wiring, async scanning, error handling
+- [x] 02-03: Scanner integration — AppState wiring, async scanning, error handling
 
 ### Phase 3: Core UI
 **Goal**: Three-column NavigationSplitView with category sidebar (icons, counts, sizes), filterable file list, basic file content viewer, real-time search, and keyboard navigation
@@ -110,7 +110,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete | 2026-02-10 |
-| 2. File Scanner | 2/3 | In progress | - |
+| 2. File Scanner | 3/3 | Complete | 2026-02-10 |
 | 3. Core UI | 0/3 | Not started | - |
 | 4. Editor | 0/3 | Not started | - |
 | 5. File Operations | 0/2 | Not started | - |

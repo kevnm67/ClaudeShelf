@@ -1,4 +1,5 @@
 import SwiftUI
+import os
 
 /// Central MVVM state container for the ClaudeShelf app.
 ///
@@ -32,6 +33,43 @@ final class AppState {
 
     /// An error message to display to the user, or nil.
     var errorMessage: String? = nil
+
+    /// The file scanner actor used to discover Claude configuration files.
+    private let scanner = FileScanner()
+
+    /// Logger for internal diagnostics.
+    private static let logger = Logger(
+        subsystem: "com.claudeshelf.app",
+        category: "AppState"
+    )
+
+    /// Performs a full scan of all enabled locations.
+    ///
+    /// The scan runs on the ``FileScanner`` actor (off the main thread)
+    /// and populates ``files`` on completion. Concurrent scans are
+    /// prevented by checking ``isScanning``.
+    func performScan() async {
+        guard !isScanning else { return }
+        isScanning = true
+        errorMessage = nil
+
+        let result = await scanner.scan(locations: scanLocations)
+
+        files = result.files
+        lastScanDate = result.scanDate
+        isScanning = false
+
+        Self.logger.info("Scan completed: \(result.files.count) files in \(String(format: "%.2f", result.duration))s")
+
+        if !result.errors.isEmpty {
+            Self.logger.warning("Scan encountered \(result.errors.count) error(s)")
+            for error in result.errors {
+                Self.logger.debug("Scan error: \(error, privacy: .private)")
+            }
+            // Show user-friendly message, don't expose raw paths
+            errorMessage = "Some locations could not be scanned. \(result.errors.count) error(s) occurred."
+        }
+    }
 
     /// Files filtered by the current category selection and search text.
     var filteredFiles: [FileEntry] {

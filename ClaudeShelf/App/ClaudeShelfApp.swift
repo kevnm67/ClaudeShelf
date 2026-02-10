@@ -8,6 +8,9 @@ struct ClaudeShelfApp: App {
         WindowGroup {
             ContentView()
                 .environment(appState)
+                .task {
+                    await appState.performScan()
+                }
         }
     }
 }
