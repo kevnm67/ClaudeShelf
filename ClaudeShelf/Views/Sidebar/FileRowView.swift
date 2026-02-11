@@ -9,6 +9,7 @@ struct FileRowView: View {
     let file: FileEntry
 
     @Environment(AppState.self) private var appState
+    @State private var trashError: String?
 
     /// Whether this file is currently selected in bulk mode.
     private var isSelected: Bool {
@@ -26,6 +27,8 @@ struct FileRowView: View {
                     .onTapGesture {
                         appState.toggleFileSelection(file.id)
                     }
+                    .accessibilityLabel(isSelected ? "Selected" : "Not selected")
+                    .accessibilityAddTraits(.isButton)
             }
 
             Image(systemName: file.category.sfSymbol)
@@ -54,6 +57,7 @@ struct FileRowView: View {
                         Image(systemName: "lock.fill")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
+                            .accessibilityLabel("Read-only")
                     }
 
                     Text(formattedSize)
@@ -87,6 +91,14 @@ struct FileRowView: View {
                 }
             }
         }
+        .alert("Trash Error", isPresented: .init(
+            get: { trashError != nil },
+            set: { if !$0 { trashError = nil } }
+        )) {
+            Button("OK", role: .cancel) { trashError = nil }
+        } message: {
+            if let error = trashError { Text(error) }
+        }
     }
 
     /// File size formatted using ByteCountFormatter with file count style.
@@ -102,7 +114,7 @@ struct FileRowView: View {
             try FileOperations.trashFile(at: file.path)
             appState.removeFiles([file])
         } catch {
-            // Error is logged by FileOperations; UI feedback handled at list level
+            trashError = "Unable to move file to Trash. Please check permissions and try again."
         }
     }
 }

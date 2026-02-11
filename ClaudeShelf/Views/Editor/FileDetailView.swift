@@ -141,6 +141,7 @@ struct FileDetailView: View {
                         .foregroundStyle(.secondary)
                         .font(.caption)
                         .help("This file is read-only")
+                        .accessibilityLabel("Read-only file")
                 }
 
                 if isDirty {
@@ -148,6 +149,7 @@ struct FileDetailView: View {
                         .fill(Color.accentColor)
                         .frame(width: 8, height: 8)
                         .help("Unsaved changes")
+                        .accessibilityLabel("Unsaved changes")
                 }
 
                 Spacer()

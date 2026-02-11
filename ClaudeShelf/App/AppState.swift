@@ -16,8 +16,28 @@ final class AppState {
     /// The currently selected category filter, or nil for "all".
     var selectedCategory: Category? = nil
 
+    /// Backing storage for the currently selected file.
+    private var _selectedFile: FileEntry? = nil
+
     /// The currently selected file for editing, or nil.
-    var selectedFile: FileEntry? = nil
+    ///
+    /// When set, refreshes the file's metadata (size, modification date,
+    /// read-only status) from disk to prevent showing stale information.
+    var selectedFile: FileEntry? {
+        get { _selectedFile }
+        set {
+            if let file = newValue {
+                let refreshed = refreshFileMetadata(for: file)
+                _selectedFile = refreshed
+                // Update the corresponding entry in the files array if metadata changed
+                if refreshed != file, let index = files.firstIndex(where: { $0.id == file.id }) {
+                    files[index] = refreshed
+                }
+            } else {
+                _selectedFile = nil
+            }
+        }
+    }
 
     /// The current search query text.
     var searchText: String = ""
@@ -204,6 +224,39 @@ final class AppState {
     /// The FileEntry objects corresponding to the currently selected IDs.
     var selectedFiles: [FileEntry] {
         files.filter { selectedFileIDs.contains($0.id) }
+    }
+
+    // MARK: - Metadata Refresh
+
+    /// Refreshes a file entry's metadata from disk.
+    ///
+    /// Performs a lightweight stat() call to re-read size, modification date,
+    /// and read-only status. Returns the original entry unchanged if the file
+    /// cannot be accessed or if no metadata changed.
+    ///
+    /// - Parameter file: The file entry to refresh.
+    /// - Returns: A new FileEntry with updated metadata, or the original if unchanged.
+    private func refreshFileMetadata(for file: FileEntry) -> FileEntry {
+        let fm = FileManager.default
+        guard let attrs = try? fm.attributesOfItem(atPath: file.path) else { return file }
+        let size = attrs[.size] as? Int64 ?? file.size
+        let modDate = attrs[.modificationDate] as? Date ?? file.modifiedDate
+        let isReadOnly = !fm.isWritableFile(atPath: file.path)
+        guard size != file.size || modDate != file.modifiedDate || isReadOnly != file.isReadOnly else {
+            return file
+        }
+        return FileEntry(
+            id: file.id,
+            name: file.name,
+            path: file.path,
+            displayName: file.displayName,
+            category: file.category,
+            scope: file.scope,
+            project: file.project,
+            size: size,
+            modifiedDate: modDate,
+            isReadOnly: isReadOnly
+        )
     }
 
     /// Removes entries from the files array, clears them from the selection,
