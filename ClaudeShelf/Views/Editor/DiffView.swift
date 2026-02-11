@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Represents a single line in a diff output.
-private enum DiffLine: Identifiable {
+enum DiffLine: Identifiable {
     case unchanged(lineNumber: Int, text: String)
     case added(lineNumber: Int, text: String)
     case removed(lineNumber: Int, text: String)
@@ -178,7 +178,7 @@ struct DiffView: View {
     ///   - original: The original (saved) text.
     ///   - modified: The modified (current editor) text.
     /// - Returns: An array of ``DiffLine`` values representing the diff.
-    private static func computeDiff(original: String, modified: String) -> [DiffLine] {
+    static func computeDiff(original: String, modified: String) -> [DiffLine] {
         let originalLines = original.components(separatedBy: "\n")
         let modifiedLines = modified.components(separatedBy: "\n")
         return buildDiffOutput(originalLines: originalLines, modifiedLines: modifiedLines)

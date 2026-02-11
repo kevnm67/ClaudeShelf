@@ -2,21 +2,30 @@ import XCTest
 @testable import ClaudeShelf
 
 final class ScanLocationStoreTests: XCTestCase {
+    private var suiteName: String!
+    private var testDefaults: UserDefaults!
+    private var store: ScanLocationStore!
+
+    override func setUp() {
+        super.setUp()
+        suiteName = "com.claudeshelf.tests.\(UUID().uuidString)"
+        testDefaults = UserDefaults(suiteName: suiteName)!
+        store = ScanLocationStore(userDefaults: testDefaults)
+    }
 
     override func tearDown() {
-        UserDefaults.standard.removeObject(forKey: "scanLocations")
+        UserDefaults.standard.removePersistentDomain(forName: suiteName)
         super.tearDown()
     }
 
     // MARK: - Load
 
     func testLoadReturnsDefaultsWhenNoSavedData() {
-        UserDefaults.standard.removeObject(forKey: "scanLocations")
         let defaults = [
             ScanLocation(id: UUID(), path: "/tmp/default-a", isEnabled: true, isDefault: true),
             ScanLocation(id: UUID(), path: "/tmp/default-b", isEnabled: true, isDefault: true),
         ]
-        let result = ScanLocationStore.load(defaults: defaults)
+        let result = store.load(defaults: defaults)
 
         XCTAssertEqual(result.count, 2)
         XCTAssertEqual(result[0].path, "/tmp/default-a")
@@ -29,9 +38,9 @@ final class ScanLocationStoreTests: XCTestCase {
 
     func testSaveAndLoadRoundTrip() {
         let locations = [ScanLocation(userPath: "/tmp/test-scan")]
-        ScanLocationStore.save(locations)
+        store.save(locations)
 
-        let loaded = ScanLocationStore.load(defaults: [])
+        let loaded = store.load(defaults: [])
         XCTAssertEqual(loaded.count, 1)
         XCTAssertEqual(loaded.first?.path, "/tmp/test-scan")
         XCTAssertFalse(loaded.first?.isDefault ?? true)
@@ -44,13 +53,13 @@ final class ScanLocationStoreTests: XCTestCase {
         // Save a default location as disabled
         var location = ScanLocation(id: UUID(), path: "/tmp/default-a", isEnabled: false, isDefault: true)
         location.isEnabled = false
-        ScanLocationStore.save([location])
+        store.save([location])
 
         // Load with merge — the default should stay disabled
         let defaults = [
             ScanLocation(id: UUID(), path: "/tmp/default-a", isEnabled: true, isDefault: true),
         ]
-        let loaded = ScanLocationStore.load(defaults: defaults)
+        let loaded = store.load(defaults: defaults)
 
         XCTAssertEqual(loaded.count, 1)
         XCTAssertFalse(loaded[0].isEnabled, "User's disabled state should be preserved after merge")
@@ -61,14 +70,14 @@ final class ScanLocationStoreTests: XCTestCase {
         let saved = [
             ScanLocation(id: UUID(), path: "/tmp/default-a", isEnabled: true, isDefault: true),
         ]
-        ScanLocationStore.save(saved)
+        store.save(saved)
 
         // Load with two defaults — new one should appear
         let defaults = [
             ScanLocation(id: UUID(), path: "/tmp/default-a", isEnabled: true, isDefault: true),
             ScanLocation(id: UUID(), path: "/tmp/default-b", isEnabled: true, isDefault: true),
         ]
-        let loaded = ScanLocationStore.load(defaults: defaults)
+        let loaded = store.load(defaults: defaults)
 
         XCTAssertEqual(loaded.count, 2)
         XCTAssertEqual(loaded[1].path, "/tmp/default-b")
@@ -81,13 +90,13 @@ final class ScanLocationStoreTests: XCTestCase {
             ScanLocation(id: UUID(), path: "/tmp/default-a", isEnabled: true, isDefault: true),
             ScanLocation(userPath: "/tmp/custom-user-dir"),
         ]
-        ScanLocationStore.save(saved)
+        store.save(saved)
 
         // Load with only the default
         let defaults = [
             ScanLocation(id: UUID(), path: "/tmp/default-a", isEnabled: true, isDefault: true),
         ]
-        let loaded = ScanLocationStore.load(defaults: defaults)
+        let loaded = store.load(defaults: defaults)
 
         XCTAssertEqual(loaded.count, 2)
         XCTAssertEqual(loaded[1].path, "/tmp/custom-user-dir")
