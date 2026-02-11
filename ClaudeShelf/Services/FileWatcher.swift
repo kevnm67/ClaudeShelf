@@ -1,13 +1,24 @@
+import CoreServices
 import Foundation
 import os
 
+/// Bridging helper to pass context from C callback into actor-isolated code.
+/// Must be a class (not actor) because `Unmanaged` requires a reference type,
+/// and the FSEvents C callback cannot capture Swift closures directly.
+private final class FileWatcherContext: @unchecked Sendable {
+    let onEvent: @Sendable () -> Void
+    init(onEvent: @escaping @Sendable () -> Void) { self.onEvent = onEvent }
+    func notify() { onEvent() }
+}
+
 /// Monitors directories for filesystem changes and notifies via callback.
 ///
-/// Uses `DispatchSource.makeFileSystemObjectSource` with `O_EVTONLY` file descriptors
-/// to watch directories. Events are debounced to coalesce rapid changes.
+/// Uses FSEvents with `kFSEventStreamCreateFlagFileEvents` for recursive
+/// subdirectory monitoring. Events are debounced to coalesce rapid changes.
 actor FileWatcher {
     private let logger = Logger(subsystem: "com.claudeshelf.app", category: "FileWatcher")
-    private var sources: [String: (source: DispatchSourceFileSystemObject, fd: Int32)] = [:]
+    private var streamRef: FSEventStreamRef?
+    private var callbackContext: FileWatcherContext?
     private var debounceTask: Task<Void, Never>?
     private let debounceInterval: TimeInterval
     private var onChange: (@Sendable () async -> Void)?
@@ -16,61 +27,85 @@ actor FileWatcher {
         self.debounceInterval = debounceInterval
     }
 
+    /// C callback for FSEvents — dispatches to the actor via the context pointer.
+    private static let eventCallback: FSEventStreamCallback = {
+        (streamRef, clientCallBackInfo, numEvents, eventPaths, eventFlags, eventIds) in
+        guard let info = clientCallBackInfo else { return }
+        let context = Unmanaged<FileWatcherContext>.fromOpaque(info).takeUnretainedValue()
+        context.notify()
+    }
+
     /// Starts watching the given directories for changes.
     func start(directories: [String], onChange: @escaping @Sendable () async -> Void) {
         self.onChange = onChange
-        stopAll()
+        stopStream()
 
-        for dir in directories {
-            guard FileManager.default.fileExists(atPath: dir) else {
-                logger.debug("Skipping non-existent directory for watching")
-                continue
-            }
+        let existingDirs = directories.filter { FileManager.default.fileExists(atPath: $0) }
 
-            let fd = open(dir, O_EVTONLY)
-            guard fd >= 0 else {
-                logger.warning("Failed to open directory for watching")
-                continue
-            }
-
-            let source = DispatchSource.makeFileSystemObjectSource(
-                fileDescriptor: fd,
-                eventMask: [.write, .delete, .rename, .attrib],
-                queue: DispatchQueue.global(qos: .utility)
-            )
-
-            source.setEventHandler { [weak self] in
-                guard let self else { return }
-                Task {
-                    await self.handleEvent()
-                }
-            }
-
-            source.setCancelHandler {
-                close(fd)
-            }
-
-            source.resume()
-            sources[dir] = (source: source, fd: fd)
+        guard !existingDirs.isEmpty else {
+            logger.debug("No existing directories to watch")
+            return
         }
+
+        let context = FileWatcherContext { [weak self] in
+            guard let self else { return }
+            Task {
+                await self.handleEvent()
+            }
+        }
+        self.callbackContext = context
+
+        var streamContext = FSEventStreamContext(
+            version: 0,
+            info: Unmanaged.passUnretained(context).toOpaque(),
+            retain: nil,
+            release: nil,
+            copyDescription: nil
+        )
+
+        let pathsToWatch = existingDirs as CFArray
+
+        guard let stream = FSEventStreamCreate(
+            kCFAllocatorDefault,
+            Self.eventCallback,
+            &streamContext,
+            pathsToWatch,
+            FSEventStreamEventId(kFSEventStreamEventIdSinceNow),
+            0.5,
+            FSEventStreamCreateFlags(
+                kFSEventStreamCreateFlagUseCFTypes
+                    | kFSEventStreamCreateFlagFileEvents
+                    | kFSEventStreamCreateFlagNoDefer
+            )
+        ) else {
+            logger.warning("Failed to create FSEventStream")
+            return
+        }
+
+        FSEventStreamSetDispatchQueue(stream, DispatchQueue.global(qos: .utility))
+        FSEventStreamStart(stream)
+        self.streamRef = stream
 
         logger.info("File watcher started for \(directories.count) directories")
     }
 
     /// Stops watching all directories.
     func stop() {
-        stopAll()
+        stopStream()
         onChange = nil
         logger.info("File watcher stopped")
     }
 
-    private func stopAll() {
+    private func stopStream() {
+        if let stream = streamRef {
+            FSEventStreamStop(stream)
+            FSEventStreamInvalidate(stream)
+            FSEventStreamRelease(stream)
+        }
+        streamRef = nil
+        callbackContext = nil
         debounceTask?.cancel()
         debounceTask = nil
-        for (_, entry) in sources {
-            entry.source.cancel()
-        }
-        sources.removeAll()
     }
 
     private func handleEvent() {
