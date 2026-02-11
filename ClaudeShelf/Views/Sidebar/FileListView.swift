@@ -2,9 +2,6 @@ import SwiftUI
 import UniformTypeIdentifiers
 import os
 
-/// Logger for bulk file operations.
-private let logger = Logger(subsystem: "com.claudeshelf.app", category: "FileListView")
-
 /// The content column of the NavigationSplitView showing filtered files
 /// grouped by scope (global first, then project) with sorting controls.
 ///
@@ -12,6 +9,8 @@ private let logger = Logger(subsystem: "com.claudeshelf.app", category: "FileLis
 /// detail column. Supports bulk selection mode for multi-file
 /// trash and delete operations.
 struct FileListView: View {
+    private static let logger = Logger(subsystem: "com.claudeshelf.app", category: "FileListView")
+
     @Environment(AppState.self) private var appState
 
     /// The current sort order for files within each scope group.
@@ -190,10 +189,10 @@ struct FileListView: View {
                 !FileManager.default.fileExists(atPath: file.path)
             })
             bulkDeleteError = error.errorDescription
-            logger.error("Bulk trash partial failure: \(error.localizedDescription, privacy: .public)")
+            Self.logger.error("Bulk trash partial failure: \(error.localizedDescription, privacy: .public)")
         } catch {
             bulkDeleteError = "Unable to move files to Trash. Please check permissions and try again."
-            logger.error("Bulk trash failed: \(error.localizedDescription, privacy: .public)")
+            Self.logger.error("Bulk trash failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -210,10 +209,10 @@ struct FileListView: View {
                 !FileManager.default.fileExists(atPath: file.path)
             })
             bulkDeleteError = error.errorDescription
-            logger.error("Bulk delete partial failure: \(error.localizedDescription, privacy: .public)")
+            Self.logger.error("Bulk delete partial failure: \(error.localizedDescription, privacy: .public)")
         } catch {
             bulkDeleteError = "Unable to delete files. Please check permissions and try again."
-            logger.error("Bulk delete failed: \(error.localizedDescription, privacy: .public)")
+            Self.logger.error("Bulk delete failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 

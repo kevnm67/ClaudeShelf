@@ -16,7 +16,7 @@ private final class FileWatcherContext: @unchecked Sendable {
 /// Uses FSEvents with `kFSEventStreamCreateFlagFileEvents` for recursive
 /// subdirectory monitoring. Events are debounced to coalesce rapid changes.
 actor FileWatcher {
-    private let logger = Logger(subsystem: "com.claudeshelf.app", category: "FileWatcher")
+    private static let logger = Logger(subsystem: "com.claudeshelf.app", category: "FileWatcher")
     private var streamRef: FSEventStreamRef?
     private var callbackContext: FileWatcherContext?
     private var debounceTask: Task<Void, Never>?
@@ -43,7 +43,7 @@ actor FileWatcher {
         let existingDirs = directories.filter { FileManager.default.fileExists(atPath: $0) }
 
         guard !existingDirs.isEmpty else {
-            logger.debug("No existing directories to watch")
+            Self.logger.debug("No existing directories to watch")
             return
         }
 
@@ -78,7 +78,7 @@ actor FileWatcher {
                     | kFSEventStreamCreateFlagNoDefer
             )
         ) else {
-            logger.warning("Failed to create FSEventStream")
+            Self.logger.warning("Failed to create FSEventStream")
             return
         }
 
@@ -86,14 +86,14 @@ actor FileWatcher {
         FSEventStreamStart(stream)
         self.streamRef = stream
 
-        logger.info("File watcher started for \(directories.count) directories")
+        Self.logger.info("File watcher started for \(directories.count) directories")
     }
 
     /// Stops watching all directories.
     func stop() {
         stopStream()
         onChange = nil
-        logger.info("File watcher stopped")
+        Self.logger.info("File watcher stopped")
     }
 
     private func stopStream() {
@@ -123,7 +123,7 @@ actor FileWatcher {
 
     private func fireCallback() async {
         guard let onChange else { return }
-        logger.info("File changes detected, triggering refresh")
+        Self.logger.info("File changes detected, triggering refresh")
         await onChange()
     }
 

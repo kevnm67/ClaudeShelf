@@ -2,9 +2,6 @@ import SwiftUI
 import QuickLook
 import os
 
-/// Logger for file save operations.
-private let logger = Logger(subsystem: "com.claudeshelf.app", category: "FileDetailView")
-
 /// Displays a selected Claude configuration file with a metadata header
 /// and an editable code editor.
 ///
@@ -17,6 +14,8 @@ private let logger = Logger(subsystem: "com.claudeshelf.app", category: "FileDet
 /// tracking with a visual indicator, read-only detection with a banner,
 /// and a diff view for reviewing unsaved changes.
 struct FileDetailView: View {
+    private static let logger = Logger(subsystem: "com.claudeshelf.app", category: "FileDetailView")
+
     let file: FileEntry
 
     @Environment(AppState.self) private var appState
@@ -66,7 +65,7 @@ struct FileDetailView: View {
                 isLoaded = true
             } catch {
                 loadError = "Unable to read file contents"
-                logger.error("Failed to load file: \(error.localizedDescription, privacy: .public)")
+                Self.logger.error("Failed to load file: \(error.localizedDescription, privacy: .public)")
             }
         }
         .alert("Save Error", isPresented: .init(
@@ -275,7 +274,7 @@ struct FileDetailView: View {
             originalContent = fileContent
         } catch {
             saveError = "Unable to save file. Please check permissions and try again."
-            logger.error("Failed to save file: \(error.localizedDescription, privacy: .public)")
+            Self.logger.error("Failed to save file: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -288,7 +287,7 @@ struct FileDetailView: View {
             appState.removeFiles([file])
         } catch {
             deleteError = "Unable to move file to Trash. Please check permissions and try again."
-            logger.error("Failed to trash file: \(error.localizedDescription, privacy: .public)")
+            Self.logger.error("Failed to trash file: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -299,7 +298,7 @@ struct FileDetailView: View {
             appState.removeFiles([file])
         } catch {
             deleteError = "Unable to delete file. Please check permissions and try again."
-            logger.error("Failed to permanently delete file: \(error.localizedDescription, privacy: .public)")
+            Self.logger.error("Failed to permanently delete file: \(error.localizedDescription, privacy: .public)")
         }
     }
 
