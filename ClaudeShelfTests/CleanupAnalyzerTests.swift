@@ -30,9 +30,9 @@ final class CleanupAnalyzerTests: XCTestCase {
 
     // MARK: - Empty File Detection
 
-    func testEmptyFileDetected() {
+    func testEmptyFileDetected() async {
         let file = makeFileEntry(id: "f1", size: 0)
-        let items = CleanupAnalyzer.analyze(files: [file])
+        let items = await CleanupAnalyzer.analyze(files: [file])
 
         let emptyItems = items.filter { $0.reason == .emptyFile }
         XCTAssertEqual(emptyItems.count, 1)
@@ -40,9 +40,9 @@ final class CleanupAnalyzerTests: XCTestCase {
         XCTAssertEqual(emptyItems.first?.detail, "File is empty (0 bytes)")
     }
 
-    func testNonEmptyFileNotFlaggedAsEmpty() {
+    func testNonEmptyFileNotFlaggedAsEmpty() async {
         let file = makeFileEntry(id: "f2", size: 512)
-        let items = CleanupAnalyzer.analyze(files: [file])
+        let items = await CleanupAnalyzer.analyze(files: [file])
 
         let emptyItems = items.filter { $0.reason == .emptyFile }
         XCTAssertTrue(emptyItems.isEmpty)
@@ -50,7 +50,7 @@ final class CleanupAnalyzerTests: XCTestCase {
 
     // MARK: - Empty Content Detection
 
-    func testEmptyContentWhitespace() throws {
+    func testEmptyContentWhitespace() async throws {
         let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: tempDir) }
@@ -60,14 +60,14 @@ final class CleanupAnalyzerTests: XCTestCase {
         let size = try FileManager.default.attributesOfItem(atPath: path)[.size] as! Int64
 
         let file = makeFileEntry(id: "ws1", path: path, size: size)
-        let items = CleanupAnalyzer.analyze(files: [file])
+        let items = await CleanupAnalyzer.analyze(files: [file])
 
         let contentItems = items.filter { $0.reason == .emptyContent }
         XCTAssertEqual(contentItems.count, 1)
         XCTAssertEqual(contentItems.first?.detail, "File contains only whitespace")
     }
 
-    func testEmptyContentEmptyArray() throws {
+    func testEmptyContentEmptyArray() async throws {
         let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: tempDir) }
@@ -77,14 +77,14 @@ final class CleanupAnalyzerTests: XCTestCase {
         let size = try FileManager.default.attributesOfItem(atPath: path)[.size] as! Int64
 
         let file = makeFileEntry(id: "arr1", path: path, size: size)
-        let items = CleanupAnalyzer.analyze(files: [file])
+        let items = await CleanupAnalyzer.analyze(files: [file])
 
         let contentItems = items.filter { $0.reason == .emptyContent }
         XCTAssertEqual(contentItems.count, 1)
         XCTAssertEqual(contentItems.first?.detail, "File contains only \"[]\"")
     }
 
-    func testEmptyContentEmptyObject() throws {
+    func testEmptyContentEmptyObject() async throws {
         let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: tempDir) }
@@ -94,14 +94,14 @@ final class CleanupAnalyzerTests: XCTestCase {
         let size = try FileManager.default.attributesOfItem(atPath: path)[.size] as! Int64
 
         let file = makeFileEntry(id: "obj1", path: path, size: size)
-        let items = CleanupAnalyzer.analyze(files: [file])
+        let items = await CleanupAnalyzer.analyze(files: [file])
 
         let contentItems = items.filter { $0.reason == .emptyContent }
         XCTAssertEqual(contentItems.count, 1)
         XCTAssertEqual(contentItems.first?.detail, "File contains only \"{}\"")
     }
 
-    func testEmptyContentNull() throws {
+    func testEmptyContentNull() async throws {
         let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: tempDir) }
@@ -111,14 +111,14 @@ final class CleanupAnalyzerTests: XCTestCase {
         let size = try FileManager.default.attributesOfItem(atPath: path)[.size] as! Int64
 
         let file = makeFileEntry(id: "null1", path: path, size: size)
-        let items = CleanupAnalyzer.analyze(files: [file])
+        let items = await CleanupAnalyzer.analyze(files: [file])
 
         let contentItems = items.filter { $0.reason == .emptyContent }
         XCTAssertEqual(contentItems.count, 1)
         XCTAssertEqual(contentItems.first?.detail, "File contains only \"null\"")
     }
 
-    func testNonEmptyContentNotFlagged() throws {
+    func testNonEmptyContentNotFlagged() async throws {
         let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: tempDir) }
@@ -128,7 +128,7 @@ final class CleanupAnalyzerTests: XCTestCase {
         let size = try FileManager.default.attributesOfItem(atPath: path)[.size] as! Int64
 
         let file = makeFileEntry(id: "real1", path: path, size: size)
-        let items = CleanupAnalyzer.analyze(files: [file])
+        let items = await CleanupAnalyzer.analyze(files: [file])
 
         let contentItems = items.filter { $0.reason == .emptyContent }
         XCTAssertTrue(contentItems.isEmpty)
@@ -136,10 +136,10 @@ final class CleanupAnalyzerTests: XCTestCase {
 
     // MARK: - Large File Skips Content Check
 
-    func testLargeFileSkipsContentCheck() {
+    func testLargeFileSkipsContentCheck() async {
         // File size >= 1024 should not be checked for empty content
         let file = makeFileEntry(id: "big1", path: "/tmp/nonexistent-big-file.md", size: 1024)
-        let items = CleanupAnalyzer.analyze(files: [file])
+        let items = await CleanupAnalyzer.analyze(files: [file])
 
         let contentItems = items.filter { $0.reason == .emptyContent }
         XCTAssertTrue(contentItems.isEmpty, "Files >= 1024 bytes should not be checked for empty content")
@@ -147,30 +147,30 @@ final class CleanupAnalyzerTests: XCTestCase {
 
     // MARK: - Stale File Detection
 
-    func testStaleFileDetected() {
+    func testStaleFileDetected() async {
         let staleDate = Date().addingTimeInterval(-(31 * 24 * 60 * 60)) // 31 days ago
         let file = makeFileEntry(id: "stale1", size: 100, modifiedDate: staleDate)
-        let items = CleanupAnalyzer.analyze(files: [file])
+        let items = await CleanupAnalyzer.analyze(files: [file])
 
         let staleItems = items.filter { $0.reason == .stale }
         XCTAssertEqual(staleItems.count, 1)
         XCTAssertTrue(staleItems.first?.detail.contains("31") ?? false)
     }
 
-    func testRecentFileNotFlaggedAsStale() {
+    func testRecentFileNotFlaggedAsStale() async {
         let recentDate = Date().addingTimeInterval(-(5 * 24 * 60 * 60)) // 5 days ago
         let file = makeFileEntry(id: "recent1", size: 100, modifiedDate: recentDate)
-        let items = CleanupAnalyzer.analyze(files: [file])
+        let items = await CleanupAnalyzer.analyze(files: [file])
 
         let staleItems = items.filter { $0.reason == .stale }
         XCTAssertTrue(staleItems.isEmpty)
     }
 
-    func testJustUnder30DaysNotStale() {
+    func testJustUnder30DaysNotStale() async {
         // 29 days should NOT be flagged (threshold is > 30 days)
         let borderDate = Date().addingTimeInterval(-(29 * 24 * 60 * 60))
         let file = makeFileEntry(id: "border1", size: 100, modifiedDate: borderDate)
-        let items = CleanupAnalyzer.analyze(files: [file])
+        let items = await CleanupAnalyzer.analyze(files: [file])
 
         let staleItems = items.filter { $0.reason == .stale }
         XCTAssertTrue(staleItems.isEmpty)
@@ -178,11 +178,11 @@ final class CleanupAnalyzerTests: XCTestCase {
 
     // MARK: - Multiple Categories
 
-    func testFileAppearsInMultipleCategories() {
+    func testFileAppearsInMultipleCategories() async {
         // A file that is both empty (0 bytes) and stale (31+ days)
         let staleDate = Date().addingTimeInterval(-(31 * 24 * 60 * 60))
         let file = makeFileEntry(id: "multi1", size: 0, modifiedDate: staleDate)
-        let items = CleanupAnalyzer.analyze(files: [file])
+        let items = await CleanupAnalyzer.analyze(files: [file])
 
         let emptyItems = items.filter { $0.reason == .emptyFile }
         let staleItems = items.filter { $0.reason == .stale }
@@ -193,12 +193,12 @@ final class CleanupAnalyzerTests: XCTestCase {
 
     // MARK: - Grouping
 
-    func testGroupedByReason() {
+    func testGroupedByReason() async {
         let staleDate = Date().addingTimeInterval(-(31 * 24 * 60 * 60))
         let emptyFile = makeFileEntry(id: "g1", name: "empty.md", size: 0)
         let staleFile = makeFileEntry(id: "g2", name: "old.md", size: 100, modifiedDate: staleDate)
 
-        let items = CleanupAnalyzer.analyze(files: [emptyFile, staleFile])
+        let items = await CleanupAnalyzer.analyze(files: [emptyFile, staleFile])
         let grouped = CleanupAnalyzer.grouped(items)
 
         // emptyFile produces .emptyFile and possibly .stale depending on date
@@ -212,10 +212,10 @@ final class CleanupAnalyzerTests: XCTestCase {
         XCTAssertEqual(grouped.first?.reason, .emptyFile)
     }
 
-    func testGroupedExcludesEmptyReasons() {
+    func testGroupedExcludesEmptyReasons() async {
         // Only recent, non-empty files — should produce no groups
         let file = makeFileEntry(id: "clean1", size: 100)
-        let items = CleanupAnalyzer.analyze(files: [file])
+        let items = await CleanupAnalyzer.analyze(files: [file])
         let grouped = CleanupAnalyzer.grouped(items)
 
         XCTAssertTrue(grouped.isEmpty)
@@ -223,11 +223,11 @@ final class CleanupAnalyzerTests: XCTestCase {
 
     // MARK: - Unique Files Deduplication
 
-    func testUniqueFilesDeduplication() {
+    func testUniqueFilesDeduplication() async {
         let staleDate = Date().addingTimeInterval(-(31 * 24 * 60 * 60))
         // File that is both empty and stale -> two CleanupItems, one unique file
         let file = makeFileEntry(id: "dedup1", size: 0, modifiedDate: staleDate)
-        let items = CleanupAnalyzer.analyze(files: [file])
+        let items = await CleanupAnalyzer.analyze(files: [file])
 
         XCTAssertGreaterThan(items.count, 1, "Should have multiple cleanup items for same file")
 
@@ -236,10 +236,10 @@ final class CleanupAnalyzerTests: XCTestCase {
         XCTAssertEqual(unique.first?.id, "dedup1")
     }
 
-    func testUniqueFilesMultipleDistinctFiles() {
+    func testUniqueFilesMultipleDistinctFiles() async {
         let file1 = makeFileEntry(id: "u1", name: "file1.md", size: 0)
         let file2 = makeFileEntry(id: "u2", name: "file2.md", size: 0)
-        let items = CleanupAnalyzer.analyze(files: [file1, file2])
+        let items = await CleanupAnalyzer.analyze(files: [file1, file2])
 
         let emptyItems = items.filter { $0.reason == .emptyFile }
         let unique = CleanupAnalyzer.uniqueFiles(from: emptyItems)
@@ -248,8 +248,8 @@ final class CleanupAnalyzerTests: XCTestCase {
 
     // MARK: - No Files
 
-    func testAnalyzeEmptyInput() {
-        let items = CleanupAnalyzer.analyze(files: [])
+    func testAnalyzeEmptyInput() async {
+        let items = await CleanupAnalyzer.analyze(files: [])
         XCTAssertTrue(items.isEmpty)
     }
 }
