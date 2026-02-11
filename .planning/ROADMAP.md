@@ -38,7 +38,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 8: Critical Sandbox & Safety** - Fix sandbox entitlements blocking scanning, FileWatcher actor isolation
 - [x] **Phase 9: Security Hardening** - TOCTOU save race, symlink protection, error sanitization
-- [ ] **Phase 10: Async & Main Thread Safety** - Async export, async cleanup analysis, NSSavePanel modernization
+- [x] **Phase 10: Async & Main Thread Safety** - Async export, async cleanup analysis, NSSavePanel modernization
 - [ ] **Phase 11: FileWatcher FSEvents Rewrite** - Replace DispatchSource with recursive FSEvents watching
 - [ ] **Phase 12: Error Handling & Accessibility** - Silent trash fix, stale metadata, VoiceOver labels
 - [ ] **Phase 13: Testability & Test Coverage** - Protocol boundaries, DI, FileScanner/AppState/SyntaxHighlighter tests
@@ -150,10 +150,10 @@ Plans:
 **Goal**: Make ExportService.exportAsZip and CleanupAnalyzer.analyze async to prevent main thread blocking, modernize NSSavePanel to async pattern
 **Depends on**: Phase 9
 **Research**: Unlikely (Swift concurrency patterns, Process terminationHandler)
-**Plans**: TBD
+**Plans**: 1
 
 Plans:
-- [ ] 10-01: TBD
+- [x] 10-01: Async ExportService, async CleanupAnalyzer, async UI callers
 
 ### Phase 11: FileWatcher FSEvents Rewrite
 **Goal**: Replace per-directory DispatchSource watching with FSEvents-based recursive watching so subdirectory file changes are detected (current watcher misses most changes)
@@ -208,7 +208,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. Cleanup, Export & Polish | v1.0 | 3/3 | Complete | 2026-02-10 |
 | 8. Critical Sandbox & Safety | v1.1 | 1/1 | Complete | 2026-02-10 |
 | 9. Security Hardening | v1.1 | 1/1 | Complete | 2026-02-10 |
-| 10. Async & Main Thread Safety | v1.1 | 0/? | Not started | - |
+| 10. Async & Main Thread Safety | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 11. FileWatcher FSEvents Rewrite | v1.1 | 0/? | Not started | - |
 | 12. Error Handling & Accessibility | v1.1 | 0/? | Not started | - |
 | 13. Testability & Test Coverage | v1.1 | 0/? | Not started | - |

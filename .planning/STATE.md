@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 ## Current Position
 
-Phase: 10 of 14 (Async & Main Thread Safety)
+Phase: 11 of 14 (FileWatcher FSEvents Rewrite)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-02-10 — Completed 09-01-PLAN.md (Phase 9 complete)
+Last activity: 2026-02-11 — Completed 10-01-PLAN.md (Phase 10 complete)
 
-Progress: ██████████░░░░ 67% (Phases 8-9 done)
+Progress: ███████████░░░ 71% (Phases 8-10 done)
 
 ## Performance Metrics
 
@@ -36,6 +36,7 @@ Progress: ██████████░░░░ 67% (Phases 8-9 done)
 | 7 | 3/3 | 15 min | 5 min |
 | 8 | 1/1 | 1 min | 1 min |
 | 9 | 1/1 | 2 min | 2 min |
+| 10 | 1/1 | 5 min | 5 min |
 
 ## Accumulated Context
 
@@ -55,6 +56,8 @@ Progress: ██████████░░░░ 67% (Phases 8-9 done)
 - [09-01] Temp-file + replaceItemAt for atomic permission-preserving save
 - [09-01] Skip all symlinks in scanner rather than resolving — simplest, safest
 - [09-01] Canonical path Set for cycle detection — passed through recursion
+- [10-01] withCheckedThrowingContinuation wrapping Process.terminationHandler for async export
+- [10-01] Task { @MainActor in } inside NSSavePanel callbacks for async work with UI updates
 
 ### Audit Findings (v1.1 Source)
 
@@ -64,7 +67,7 @@ Progress: ██████████░░░░ 67% (Phases 8-9 done)
 
 **High:**
 - ~~H-1: TOCTOU race in saveFile — files briefly world-readable~~ ✅ Fixed in Phase 9
-- H-2: ExportService blocks main thread with Process.waitUntilExit()
+- ~~H-2: ExportService blocks main thread with Process.waitUntilExit()~~ ✅ Fixed in Phase 10
 - H-3: FileWatcher not recursive — misses subdirectory changes
 - H-4: Trash from context menu fails silently
 
@@ -85,6 +88,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-10
-Stopped at: Completed Phase 9 (Security Hardening)
+Last session: 2026-02-11
+Stopped at: Completed Phase 10 (Async & Main Thread Safety)
 Resume file: None
