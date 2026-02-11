@@ -12,7 +12,7 @@ enum CleanupAnalyzer {
     private static let emptyContentPatterns: Set<String> = ["[]", "{}", "null"]
 
     /// Analyzes files and returns cleanup candidates.
-    static func analyze(files: [FileEntry]) -> [CleanupItem] {
+    static func analyze(files: [FileEntry]) async -> [CleanupItem] {
         var items: [CleanupItem] = []
         let now = Date()
 

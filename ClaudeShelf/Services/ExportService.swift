@@ -15,7 +15,7 @@ enum ExportService {
     ///   - files: The files to include in the archive.
     ///   - destination: The path where the zip file will be created.
     /// - Throws: If staging or zip creation fails.
-    static func exportAsZip(files: [FileEntry], to destination: String) throws {
+    static func exportAsZip(files: [FileEntry], to destination: String) async throws {
         guard !files.isEmpty else {
             throw ExportError.noFiles
         }
@@ -64,13 +64,18 @@ enum ExportService {
         process.standardError = pipe
 
         try process.run()
-        process.waitUntilExit()
 
-        guard process.terminationStatus == 0 else {
-            let errorData = pipe.fileHandleForReading.readDataToEndOfFile()
-            let errorMsg = String(data: errorData, encoding: .utf8) ?? "Unknown error"
-            logger.error("ditto failed: \(errorMsg, privacy: .public)")
-            throw ExportError.zipCreationFailed
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            process.terminationHandler = { process in
+                if process.terminationStatus == 0 {
+                    continuation.resume()
+                } else {
+                    let errorData = pipe.fileHandleForReading.readDataToEndOfFile()
+                    let errorMsg = String(data: errorData, encoding: .utf8) ?? "Unknown error"
+                    logger.error("ditto failed: \(errorMsg, privacy: .public)")
+                    continuation.resume(throwing: ExportError.zipCreationFailed)
+                }
+            }
         }
 
         logger.info("Exported \(files.count) files to zip archive")
