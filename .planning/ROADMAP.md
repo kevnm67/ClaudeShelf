@@ -36,7 +36,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 ### 🚧 v1.1 Audit Fixes & Hardening (Phases 8-14)
 
-- [ ] **Phase 8: Critical Sandbox & Safety** - Fix sandbox entitlements blocking scanning, FileWatcher actor isolation
+- [x] **Phase 8: Critical Sandbox & Safety** - Fix sandbox entitlements blocking scanning, FileWatcher actor isolation
 - [ ] **Phase 9: Security Hardening** - TOCTOU save race, symlink protection, error sanitization
 - [ ] **Phase 10: Async & Main Thread Safety** - Async export, async cleanup analysis, NSSavePanel modernization
 - [ ] **Phase 11: FileWatcher FSEvents Rewrite** - Replace DispatchSource with recursive FSEvents watching
@@ -132,10 +132,10 @@ Plans:
 **Goal**: Fix the two critical blockers — sandbox entitlements that prevent the app from scanning any directories, and FileWatcher actor isolation violation in deinit that causes a data race
 **Depends on**: v1.0 complete
 **Research**: Unlikely (entitlements documentation, Swift actor isolation rules)
-**Plans**: TBD
+**Plans**: 1
 
 Plans:
-- [ ] 08-01: TBD (run /gsd:plan-phase 8 to break down)
+- [x] 08-01: Disable sandbox, fix FileWatcher deinit actor isolation
 
 ### Phase 9: Security Hardening
 **Goal**: Eliminate TOCTOU race in file save (files briefly world-readable), add symlink loop protection in scanner, sanitize error messages to prevent raw path leakage
@@ -206,7 +206,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 5. File Operations | v1.0 | 2/2 | Complete | 2026-02-10 |
 | 6. File Watching | v1.0 | 2/2 | Complete | 2026-02-10 |
 | 7. Cleanup, Export & Polish | v1.0 | 3/3 | Complete | 2026-02-10 |
-| 8. Critical Sandbox & Safety | v1.1 | 0/? | Not started | - |
+| 8. Critical Sandbox & Safety | v1.1 | 1/1 | Complete | 2026-02-10 |
 | 9. Security Hardening | v1.1 | 0/? | Not started | - |
 | 10. Async & Main Thread Safety | v1.1 | 0/? | Not started | - |
 | 11. FileWatcher FSEvents Rewrite | v1.1 | 0/? | Not started | - |
