@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 ## Current Position
 
-Phase: 14 of 14 (Code Quality Polish)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-02-11 — Completed 13-02-PLAN.md (Phase 13 complete)
+Phase: 14 of 14 (Code Quality Polish) — COMPLETE
+Plan: All done
+Status: Milestone v1.1 complete
+Last activity: 2026-02-11 — Completed 14-01-PLAN.md (Phase 14 complete)
 
-Progress: ██████████████ 93% (Phases 8-13 done)
+Progress: ████████████████ 100% (All phases complete)
 
 ## Performance Metrics
 
@@ -40,6 +40,7 @@ Progress: ██████████████ 93% (Phases 8-13 done)
 | 11 | 1/1 | 4 min | 4 min |
 | 12 | 1/1 | 4 min | 4 min |
 | 13 | 2/2 | 9 min | 5 min |
+| 14 | 1/1 | 4 min | 4 min |
 
 ## Accumulated Context
 
@@ -69,6 +70,9 @@ Progress: ██████████████ 93% (Phases 8-13 done)
 - [13-01] DiffLine and computeDiff made internal for testability
 - [13-01] UserDefaults(suiteName:) with UUID-based names for test isolation
 - [13-02] FileCategory typealias to disambiguate from ObjC Category in strict concurrency
+- [14-01] All loggers use private static let pattern for consistency
+- [14-01] DiffLine.id uses lineNumber only (deterministic, no hashValue)
+- [14-01] ScanLocation default UUIDs derived from SHA256 of path (deterministic across launches)
 
 ### Audit Findings (v1.1 Source)
 
@@ -83,7 +87,7 @@ Progress: ██████████████ 93% (Phases 8-13 done)
 - ~~H-4: Trash from context menu fails silently~~ ✅ Fixed in Phase 12
 
 **Medium:**
-- M-1 through M-9: Test pollution, no DI, sync I/O, stale metadata, symlinks, error leaking
+- ~~M-1 through M-9: Test pollution, no DI, sync I/O, stale metadata, symlinks, error leaking~~ ✅ Addressed across Phases 9-14
 
 ### Deferred Issues
 
@@ -100,5 +104,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed Phase 13 (Testability & Test Coverage)
+Stopped at: Milestone v1.1 complete — all 14 phases done
 Resume file: None
