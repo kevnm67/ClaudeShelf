@@ -178,10 +178,11 @@ Plans:
 **Goal**: Add protocol boundaries on services for dependency injection, make ScanLocationStore injectable (fix UserDefaults pollution in tests), add missing tests for FileScanner, AppState, SyntaxHighlighter, and DiffView
 **Depends on**: Phase 12
 **Research**: Unlikely (standard Swift protocol/DI patterns, XCTest)
-**Plans**: TBD
+**Plans**: 2
 
 Plans:
-- [ ] 13-01: TBD
+- [x] 13-01: DI infrastructure, SyntaxHighlighter tests, DiffView tests
+- [x] 13-02: FileScanner tests, AppState tests
 
 ### Phase 14: Code Quality Polish
 **Goal**: Fix logger inconsistencies (static, matching bundle ID subsystem), ByteCountFormatter per-row allocation, remove placeholder test, fix DiffLine.id nondeterminism, deterministic ScanLocation UUIDs
@@ -211,5 +212,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 10. Async & Main Thread Safety | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 11. FileWatcher FSEvents Rewrite | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 12. Error Handling & Accessibility | v1.1 | 1/1 | Complete | 2026-02-11 |
-| 13. Testability & Test Coverage | v1.1 | 0/? | Not started | - |
+| 13. Testability & Test Coverage | v1.1 | 2/2 | Complete | 2026-02-11 |
 | 14. Code Quality Polish | v1.1 | 0/? | Not started | - |

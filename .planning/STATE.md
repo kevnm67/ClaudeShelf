@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 ## Current Position
 
-Phase: 13 of 14 (Testability & Test Coverage)
+Phase: 14 of 14 (Code Quality Polish)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-02-11 — Completed 12-01-PLAN.md (Phase 12 complete)
+Last activity: 2026-02-11 — Completed 13-02-PLAN.md (Phase 13 complete)
 
-Progress: █████████████░ 86% (Phases 8-12 done)
+Progress: ██████████████ 93% (Phases 8-13 done)
 
 ## Performance Metrics
 
@@ -39,6 +39,7 @@ Progress: █████████████░ 86% (Phases 8-12 done)
 | 10 | 1/1 | 5 min | 5 min |
 | 11 | 1/1 | 4 min | 4 min |
 | 12 | 1/1 | 4 min | 4 min |
+| 13 | 2/2 | 9 min | 5 min |
 
 ## Accumulated Context
 
@@ -64,6 +65,10 @@ Progress: █████████████░ 86% (Phases 8-12 done)
 - [11-01] Unmanaged.passUnretained (not passRetained) to avoid retain cycle in FSEvents context
 - [12-01] Computed property backed by _selectedFile for @Observable metadata refresh (didSet not supported)
 - [12-01] Standard SwiftUI buttons with Text labels already VoiceOver-accessible — only Image-only elements need labels
+- [13-01] ScanLocationStore converted from enum to struct with injectable UserDefaults for DI
+- [13-01] DiffLine and computeDiff made internal for testability
+- [13-01] UserDefaults(suiteName:) with UUID-based names for test isolation
+- [13-02] FileCategory typealias to disambiguate from ObjC Category in strict concurrency
 
 ### Audit Findings (v1.1 Source)
 
@@ -95,5 +100,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed Phase 12 (Error Handling & Accessibility)
+Stopped at: Completed Phase 13 (Testability & Test Coverage)
 Resume file: None
