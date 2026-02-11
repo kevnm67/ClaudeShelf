@@ -16,7 +16,7 @@ final class ExportServiceTests: XCTestCase {
         super.tearDown()
     }
 
-    func testExportCreatesZipFile() throws {
+    func testExportCreatesZipFile() async throws {
         // Create temp source files
         let file1Path = tempDir.appendingPathComponent("test1.md").path
         try "# Test 1".write(toFile: file1Path, atomically: true, encoding: .utf8)
@@ -29,7 +29,7 @@ final class ExportServiceTests: XCTestCase {
         ]
 
         let zipPath = tempDir.appendingPathComponent("export.zip").path
-        try ExportService.exportAsZip(files: entries, to: zipPath)
+        try await ExportService.exportAsZip(files: entries, to: zipPath)
 
         XCTAssertTrue(FileManager.default.fileExists(atPath: zipPath))
         // Verify it's non-empty
@@ -38,9 +38,14 @@ final class ExportServiceTests: XCTestCase {
         XCTAssertGreaterThan(size, 0)
     }
 
-    func testExportThrowsOnEmptyFiles() {
+    func testExportThrowsOnEmptyFiles() async {
         let zipPath = tempDir.appendingPathComponent("empty.zip").path
-        XCTAssertThrowsError(try ExportService.exportAsZip(files: [], to: zipPath))
+        do {
+            try await ExportService.exportAsZip(files: [], to: zipPath)
+            XCTFail("Expected error for empty files")
+        } catch {
+            // Expected
+        }
     }
 
     func testDefaultFilenameFormat() {
@@ -49,7 +54,7 @@ final class ExportServiceTests: XCTestCase {
         XCTAssertTrue(name.hasSuffix(".zip"))
     }
 
-    func testExportHandlesNameCollisions() throws {
+    func testExportHandlesNameCollisions() async throws {
         let file1Path = tempDir.appendingPathComponent("config1.json").path
         try "{}".write(toFile: file1Path, atomically: true, encoding: .utf8)
         let file2Path = tempDir.appendingPathComponent("config2.json").path
@@ -62,7 +67,7 @@ final class ExportServiceTests: XCTestCase {
         ]
 
         let zipPath = tempDir.appendingPathComponent("collisions.zip").path
-        try ExportService.exportAsZip(files: entries, to: zipPath)
+        try await ExportService.exportAsZip(files: entries, to: zipPath)
         XCTAssertTrue(FileManager.default.fileExists(atPath: zipPath))
     }
 
