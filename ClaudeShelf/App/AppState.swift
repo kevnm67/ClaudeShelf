@@ -74,10 +74,14 @@ final class AppState {
         category: "AppState"
     )
 
+    /// The store used to persist scan location configuration.
+    private let store: ScanLocationStoring
+
     // MARK: - Initialization
 
-    init() {
-        self.scanLocations = ScanLocationStore.load(defaults: ScanLocation.defaultLocations)
+    init(store: ScanLocationStoring = ScanLocationStore()) {
+        self.store = store
+        self.scanLocations = store.load(defaults: ScanLocation.defaultLocations)
     }
 
     // MARK: - Scan Location Management
@@ -117,7 +121,7 @@ final class AppState {
 
     /// Persists current scan locations to UserDefaults.
     private func saveScanLocations() {
-        ScanLocationStore.save(scanLocations)
+        store.save(scanLocations)
     }
 
     /// Performs a full scan of all enabled locations.
