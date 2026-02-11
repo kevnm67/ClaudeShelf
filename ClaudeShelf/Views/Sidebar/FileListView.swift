@@ -233,7 +233,7 @@ struct FileListView: View {
             do {
                 try ExportService.exportAsZip(files: filesToExport, to: url.path)
             } catch {
-                exportError = error.localizedDescription
+                exportError = "Unable to export files. Please try again."
             }
         }
     }

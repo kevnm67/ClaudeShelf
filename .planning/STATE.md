@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 ## Current Position
 
-Phase: 9 of 14 (Security Hardening)
+Phase: 10 of 14 (Async & Main Thread Safety)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-02-10 — Completed 08-01-PLAN.md (Phase 8 complete)
+Last activity: 2026-02-10 — Completed 09-01-PLAN.md (Phase 9 complete)
 
-Progress: █████████░░░░░ 61% (v1.0 complete, Phase 8 done)
+Progress: ██████████░░░░ 67% (Phases 8-9 done)
 
 ## Performance Metrics
 
 **Velocity (v1.0):**
-- Total plans completed: 19
+- Total plans completed: 20
 - Average duration: 4 min
-- Total execution time: 81 min
+- Total execution time: 83 min
 
 **By Phase (v1.0):**
 
@@ -35,6 +35,7 @@ Progress: █████████░░░░░ 61% (v1.0 complete, Phase 8
 | 6 | 2/2 | 10 min | 5 min |
 | 7 | 3/3 | 15 min | 5 min |
 | 8 | 1/1 | 1 min | 1 min |
+| 9 | 1/1 | 2 min | 2 min |
 
 ## Accumulated Context
 
@@ -51,6 +52,9 @@ Progress: █████████░░░░░ 61% (v1.0 complete, Phase 8
 - [03-01] ContentUnavailableView for empty states — modern macOS 15+ pattern
 - [08-01] Disabled sandbox entirely — temporary exceptions deprecated, dev tools need broad FS access
 - [08-01] Removed actor deinit rather than nonisolated(unsafe) — DispatchSource cancel handlers suffice
+- [09-01] Temp-file + replaceItemAt for atomic permission-preserving save
+- [09-01] Skip all symlinks in scanner rather than resolving — simplest, safest
+- [09-01] Canonical path Set for cycle detection — passed through recursion
 
 ### Audit Findings (v1.1 Source)
 
@@ -59,7 +63,7 @@ Progress: █████████░░░░░ 61% (v1.0 complete, Phase 8
 - ~~C-2: FileWatcher deinit accesses actor-isolated state~~ ✅ Fixed in Phase 8
 
 **High:**
-- H-1: TOCTOU race in saveFile — files briefly world-readable
+- ~~H-1: TOCTOU race in saveFile — files briefly world-readable~~ ✅ Fixed in Phase 9
 - H-2: ExportService blocks main thread with Process.waitUntilExit()
 - H-3: FileWatcher not recursive — misses subdirectory changes
 - H-4: Trash from context menu fails silently
@@ -82,5 +86,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed Phase 8 (Critical Sandbox & Safety)
+Stopped at: Completed Phase 9 (Security Hardening)
 Resume file: None

@@ -37,7 +37,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ### 🚧 v1.1 Audit Fixes & Hardening (Phases 8-14)
 
 - [x] **Phase 8: Critical Sandbox & Safety** - Fix sandbox entitlements blocking scanning, FileWatcher actor isolation
-- [ ] **Phase 9: Security Hardening** - TOCTOU save race, symlink protection, error sanitization
+- [x] **Phase 9: Security Hardening** - TOCTOU save race, symlink protection, error sanitization
 - [ ] **Phase 10: Async & Main Thread Safety** - Async export, async cleanup analysis, NSSavePanel modernization
 - [ ] **Phase 11: FileWatcher FSEvents Rewrite** - Replace DispatchSource with recursive FSEvents watching
 - [ ] **Phase 12: Error Handling & Accessibility** - Silent trash fix, stale metadata, VoiceOver labels
@@ -141,10 +141,10 @@ Plans:
 **Goal**: Eliminate TOCTOU race in file save (files briefly world-readable), add symlink loop protection in scanner, sanitize error messages to prevent raw path leakage
 **Depends on**: Phase 8
 **Research**: Unlikely (POSIX file permission APIs, FileManager symlink detection)
-**Plans**: TBD
+**Plans**: 1
 
 Plans:
-- [ ] 09-01: TBD
+- [x] 09-01: TOCTOU fix, symlink protection, error sanitization
 
 ### Phase 10: Async & Main Thread Safety
 **Goal**: Make ExportService.exportAsZip and CleanupAnalyzer.analyze async to prevent main thread blocking, modernize NSSavePanel to async pattern
@@ -207,7 +207,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. File Watching | v1.0 | 2/2 | Complete | 2026-02-10 |
 | 7. Cleanup, Export & Polish | v1.0 | 3/3 | Complete | 2026-02-10 |
 | 8. Critical Sandbox & Safety | v1.1 | 1/1 | Complete | 2026-02-10 |
-| 9. Security Hardening | v1.1 | 0/? | Not started | - |
+| 9. Security Hardening | v1.1 | 1/1 | Complete | 2026-02-10 |
 | 10. Async & Main Thread Safety | v1.1 | 0/? | Not started | - |
 | 11. FileWatcher FSEvents Rewrite | v1.1 | 0/? | Not started | - |
 | 12. Error Handling & Accessibility | v1.1 | 0/? | Not started | - |

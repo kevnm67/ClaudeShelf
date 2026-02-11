@@ -22,24 +22,41 @@ enum FileOperations {
     private static let logger = Logger(subsystem: "com.claudeshelf.app", category: "FileOperations")
 
     /// Saves content to an existing file, preserving its POSIX permissions.
+    ///
+    /// Writes to a temporary file first, sets correct permissions on it,
+    /// then atomically replaces the original — eliminating the TOCTOU window
+    /// where the file could be world-readable.
     static func saveFile(at path: String, content: String) throws {
         let fm = FileManager.default
+        let url = URL(fileURLWithPath: path)
+        let parentDir = url.deletingLastPathComponent()
+
         // Read current permissions before writing
         let attributes = try fm.attributesOfItem(atPath: path)
         let posixPermissions = attributes[.posixPermissions] as? NSNumber
 
-        // Write content atomically
-        try content.write(toFile: path, atomically: true, encoding: .utf8)
-
-        // Restore original permissions
-        if let permissions = posixPermissions {
-            try fm.setAttributes([.posixPermissions: permissions], ofItemAtPath: path)
+        // Write content to a temp file in the same directory
+        let tempURL = parentDir.appendingPathComponent(".\(UUID().uuidString).tmp")
+        guard let data = content.data(using: .utf8) else {
+            throw CocoaError(.fileWriteInapplicableStringEncoding)
         }
+        try data.write(to: tempURL)
+
+        // Set correct permissions on temp file BEFORE it replaces the original
+        if let permissions = posixPermissions {
+            try fm.setAttributes([.posixPermissions: permissions], ofItemAtPath: tempURL.path)
+        }
+
+        // Atomically replace — file is never visible with wrong permissions
+        _ = try fm.replaceItemAt(url, withItemAt: tempURL)
 
         logger.info("File saved successfully")
     }
 
     /// Creates a new file with content and secure default permissions (0600).
+    ///
+    /// Writes to a temporary file first, sets 0600 permissions on it,
+    /// then moves to the final path — file is never visible with wrong permissions.
     static func createFile(at path: String, content: String = "") throws {
         let fm = FileManager.default
         let url = URL(fileURLWithPath: path)
@@ -50,11 +67,18 @@ enum FileOperations {
             try fm.createDirectory(at: parentDir, withIntermediateDirectories: true)
         }
 
-        // Write content
-        try content.write(toFile: path, atomically: true, encoding: .utf8)
+        // Write to temp file, set secure permissions, then move to final path
+        let tempURL = parentDir.appendingPathComponent(".\(UUID().uuidString).tmp")
+        guard let data = content.data(using: .utf8) else {
+            throw CocoaError(.fileWriteInapplicableStringEncoding)
+        }
+        try data.write(to: tempURL)
 
-        // Set secure permissions (owner read/write only)
-        try fm.setAttributes([.posixPermissions: NSNumber(value: 0o600)], ofItemAtPath: path)
+        // Set secure permissions on temp file BEFORE it becomes visible
+        try fm.setAttributes([.posixPermissions: NSNumber(value: 0o600)], ofItemAtPath: tempURL.path)
+
+        // Move to final path
+        try fm.moveItem(at: tempURL, to: url)
 
         logger.info("File created with 0600 permissions")
     }
