@@ -10,7 +10,7 @@ struct CleanupSheet: View {
     @State private var isAnalyzing = true
     @State private var trashError: String?
 
-    private let logger = Logger(subsystem: "com.claudeshelf.app", category: "CleanupSheet")
+    private static let logger = Logger(subsystem: "com.claudeshelf.app", category: "CleanupSheet")
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -127,7 +127,7 @@ struct CleanupSheet: View {
             if items.isEmpty { dismiss() }
         } catch {
             trashError = "Some files could not be moved to Trash."
-            logger.error("Cleanup trash failed: \(error.localizedDescription, privacy: .public)")
+            Self.logger.error("Cleanup trash failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 }

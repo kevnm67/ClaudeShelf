@@ -8,12 +8,12 @@ enum DiffLine: Identifiable {
 
     var id: String {
         switch self {
-        case .unchanged(let lineNumber, let text):
-            return "u-\(lineNumber)-\(text.hashValue)"
-        case .added(let lineNumber, let text):
-            return "a-\(lineNumber)-\(text.hashValue)"
-        case .removed(let lineNumber, let text):
-            return "r-\(lineNumber)-\(text.hashValue)"
+        case .unchanged(let lineNumber, _):
+            return "u-\(lineNumber)"
+        case .added(let lineNumber, _):
+            return "a-\(lineNumber)"
+        case .removed(let lineNumber, _):
+            return "r-\(lineNumber)"
         }
     }
 

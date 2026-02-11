@@ -11,7 +11,7 @@ None
 ## Milestones
 
 - ✅ **v1.0 MVP** - Phases 1-7 (shipped 2026-02-10)
-- 🚧 **v1.1 Audit Fixes & Hardening** - Phases 8-14 (in progress)
+- ✅ **v1.1 Audit Fixes & Hardening** - Phases 8-14 (completed 2026-02-11)
 
 ## Phases
 
@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 </details>
 
-### 🚧 v1.1 Audit Fixes & Hardening (Phases 8-14)
+### ✅ v1.1 Audit Fixes & Hardening (Phases 8-14) — COMPLETED 2026-02-11
 
 - [x] **Phase 8: Critical Sandbox & Safety** - Fix sandbox entitlements blocking scanning, FileWatcher actor isolation
 - [x] **Phase 9: Security Hardening** - TOCTOU save race, symlink protection, error sanitization
@@ -188,10 +188,10 @@ Plans:
 **Goal**: Fix logger inconsistencies (static, matching bundle ID subsystem), ByteCountFormatter per-row allocation, remove placeholder test, fix DiffLine.id nondeterminism, deterministic ScanLocation UUIDs
 **Depends on**: Phase 13
 **Research**: Unlikely (internal code quality, no new APIs)
-**Plans**: TBD
+**Plans**: 1
 
 Plans:
-- [ ] 14-01: TBD
+- [x] 14-01: Logger consistency, ByteCountFormatter fix, DiffLine.id determinism, ScanLocation UUIDs
 
 ## Progress
 
@@ -213,4 +213,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 11. FileWatcher FSEvents Rewrite | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 12. Error Handling & Accessibility | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 13. Testability & Test Coverage | v1.1 | 2/2 | Complete | 2026-02-11 |
-| 14. Code Quality Polish | v1.1 | 0/? | Not started | - |
+| 14. Code Quality Polish | v1.1 | 1/1 | Complete | 2026-02-11 |
