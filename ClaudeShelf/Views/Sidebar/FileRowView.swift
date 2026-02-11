@@ -27,6 +27,8 @@ struct FileRowView: View {
                     .onTapGesture {
                         appState.toggleFileSelection(file.id)
                     }
+                    .accessibilityLabel(isSelected ? "Selected" : "Not selected")
+                    .accessibilityAddTraits(.isButton)
             }
 
             Image(systemName: file.category.sfSymbol)
@@ -55,6 +57,7 @@ struct FileRowView: View {
                         Image(systemName: "lock.fill")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
+                            .accessibilityLabel("Read-only")
                     }
 
                     Text(formattedSize)

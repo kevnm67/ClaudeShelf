@@ -9,6 +9,8 @@ struct CleanupRow: View {
         HStack(spacing: 8) {
             Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                 .foregroundStyle(isSelected ? Color.accentColor : .secondary)
+                .accessibilityLabel(isSelected ? "Selected" : "Not selected")
+                .accessibilityAddTraits(.isButton)
 
             Image(systemName: item.file.category.sfSymbol)
                 .foregroundStyle(.secondary)
