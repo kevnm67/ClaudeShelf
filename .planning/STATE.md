@@ -5,25 +5,25 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Reliable discovery, safe editing, and native-quality management of Claude Code config files — with zero network exposure.
-**Current focus:** Complete
+**Current focus:** v1.1 Audit Fixes & Hardening
 
 ## Current Position
 
-Phase: 7 of 7 (All phases complete)
-Plan: 18 of 18 total plans executed
-Status: Milestone complete
-Last activity: 2026-02-10 — Completed Phase 7 (Cleanup, Export & Polish)
+Phase: 9 of 14 (Security Hardening)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-02-10 — Completed 08-01-PLAN.md (Phase 8 complete)
 
-Progress: ██████████ 100%
+Progress: █████████░░░░░ 61% (v1.0 complete, Phase 8 done)
 
 ## Performance Metrics
 
-**Velocity:**
-- Total plans completed: 18
+**Velocity (v1.0):**
+- Total plans completed: 19
 - Average duration: 4 min
-- Total execution time: 80 min
+- Total execution time: 81 min
 
-**By Phase:**
+**By Phase (v1.0):**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
@@ -34,10 +34,7 @@ Progress: ██████████ 100%
 | 5 | 2/2 | 10 min | 5 min |
 | 6 | 2/2 | 10 min | 5 min |
 | 7 | 3/3 | 15 min | 5 min |
-
-**Recent Trend:**
-- Last 5 plans: 3m, 4m, 3m, 3m, 3m
-- Trend: Stable ~3 min
+| 8 | 1/1 | 1 min | 1 min |
 
 ## Accumulated Context
 
@@ -52,17 +49,38 @@ Progress: ██████████ 100%
 - [03-01] Category? directly for List selection (nil = All Files) — simpler than wrapper enum
 - [03-01] @Bindable var appState inside body for two-way bindings with @Environment
 - [03-01] ContentUnavailableView for empty states — modern macOS 15+ pattern
+- [08-01] Disabled sandbox entirely — temporary exceptions deprecated, dev tools need broad FS access
+- [08-01] Removed actor deinit rather than nonisolated(unsafe) — DispatchSource cancel handlers suffice
+
+### Audit Findings (v1.1 Source)
+
+**Critical:**
+- ~~C-1: App sandbox entitlements block all file scanning~~ ✅ Fixed in Phase 8
+- ~~C-2: FileWatcher deinit accesses actor-isolated state~~ ✅ Fixed in Phase 8
+
+**High:**
+- H-1: TOCTOU race in saveFile — files briefly world-readable
+- H-2: ExportService blocks main thread with Process.waitUntilExit()
+- H-3: FileWatcher not recursive — misses subdirectory changes
+- H-4: Trash from context menu fails silently
+
+**Medium:**
+- M-1 through M-9: Test pollution, no DI, sync I/O, stale metadata, symlinks, error leaking
 
 ### Deferred Issues
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
 None.
 
+### Roadmap Evolution
+
+- Milestone v1.1 created: Audit fixes & hardening, 7 phases (Phase 8-14)
+
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: All phases complete — milestone finished
+Stopped at: Completed Phase 8 (Critical Sandbox & Safety)
 Resume file: None
