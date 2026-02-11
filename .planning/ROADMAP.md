@@ -172,7 +172,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 12-01: TBD
+- [x] 12-01: Silent trash fix, VoiceOver accessibility labels, metadata refresh on selection
 
 ### Phase 13: Testability & Test Coverage
 **Goal**: Add protocol boundaries on services for dependency injection, make ScanLocationStore injectable (fix UserDefaults pollution in tests), add missing tests for FileScanner, AppState, SyntaxHighlighter, and DiffView
@@ -210,6 +210,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 9. Security Hardening | v1.1 | 1/1 | Complete | 2026-02-10 |
 | 10. Async & Main Thread Safety | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 11. FileWatcher FSEvents Rewrite | v1.1 | 1/1 | Complete | 2026-02-11 |
-| 12. Error Handling & Accessibility | v1.1 | 0/? | Not started | - |
+| 12. Error Handling & Accessibility | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 13. Testability & Test Coverage | v1.1 | 0/? | Not started | - |
 | 14. Code Quality Polish | v1.1 | 0/? | Not started | - |
