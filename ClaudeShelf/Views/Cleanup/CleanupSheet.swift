@@ -81,7 +81,7 @@ struct CleanupSheet: View {
             .padding()
         }
         .frame(width: 550, height: 450)
-        .task { analyze() }
+        .task { await analyze() }
         .alert("Cleanup Error", isPresented: .init(
             get: { trashError != nil },
             set: { if !$0 { trashError = nil } }
@@ -108,8 +108,8 @@ struct CleanupSheet: View {
         }
     }
 
-    private func analyze() {
-        items = CleanupAnalyzer.analyze(files: appState.files)
+    private func analyze() async {
+        items = await CleanupAnalyzer.analyze(files: appState.files)
         isAnalyzing = false
     }
 

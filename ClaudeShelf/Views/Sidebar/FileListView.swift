@@ -230,10 +230,12 @@ struct FileListView: View {
 
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
-            do {
-                try ExportService.exportAsZip(files: filesToExport, to: url.path)
-            } catch {
-                exportError = "Unable to export files. Please try again."
+            Task { @MainActor in
+                do {
+                    try await ExportService.exportAsZip(files: filesToExport, to: url.path)
+                } catch {
+                    exportError = "Unable to export files. Please try again."
+                }
             }
         }
     }
