@@ -92,9 +92,4 @@ actor FileWatcher {
         await onChange()
     }
 
-    deinit {
-        for (_, entry) in sources {
-            entry.source.cancel()
-        }
-    }
 }
