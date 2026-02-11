@@ -39,7 +39,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 8: Critical Sandbox & Safety** - Fix sandbox entitlements blocking scanning, FileWatcher actor isolation
 - [x] **Phase 9: Security Hardening** - TOCTOU save race, symlink protection, error sanitization
 - [x] **Phase 10: Async & Main Thread Safety** - Async export, async cleanup analysis, NSSavePanel modernization
-- [ ] **Phase 11: FileWatcher FSEvents Rewrite** - Replace DispatchSource with recursive FSEvents watching
+- [x] **Phase 11: FileWatcher FSEvents Rewrite** - Replace DispatchSource with recursive FSEvents watching
 - [ ] **Phase 12: Error Handling & Accessibility** - Silent trash fix, stale metadata, VoiceOver labels
 - [ ] **Phase 13: Testability & Test Coverage** - Protocol boundaries, DI, FileScanner/AppState/SyntaxHighlighter tests
 - [ ] **Phase 14: Code Quality Polish** - Logger consistency, ByteCountFormatter, placeholder test, DiffLine IDs
@@ -160,10 +160,10 @@ Plans:
 **Depends on**: Phase 10
 **Research**: Likely (FSEvents C API from Swift, recursive monitoring patterns)
 **Research topics**: FSEventStreamCreate vs DispatchSource for recursive watching, FSEventStreamEventFlags interpretation, actor-safe callback patterns for FSEvents in Swift 6
-**Plans**: TBD
+**Plans**: 1
 
 Plans:
-- [ ] 11-01: TBD
+- [x] 11-01: FSEvents recursive watching rewrite with subdirectory test
 
 ### Phase 12: Error Handling & Accessibility
 **Goal**: Fix silent trash failure in FileRowView (user gets no feedback), handle stale FileEntry metadata between scans, add VoiceOver accessibility labels and button traits to interactive elements
@@ -209,7 +209,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 8. Critical Sandbox & Safety | v1.1 | 1/1 | Complete | 2026-02-10 |
 | 9. Security Hardening | v1.1 | 1/1 | Complete | 2026-02-10 |
 | 10. Async & Main Thread Safety | v1.1 | 1/1 | Complete | 2026-02-11 |
-| 11. FileWatcher FSEvents Rewrite | v1.1 | 0/? | Not started | - |
+| 11. FileWatcher FSEvents Rewrite | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 12. Error Handling & Accessibility | v1.1 | 0/? | Not started | - |
 | 13. Testability & Test Coverage | v1.1 | 0/? | Not started | - |
 | 14. Code Quality Polish | v1.1 | 0/? | Not started | - |
