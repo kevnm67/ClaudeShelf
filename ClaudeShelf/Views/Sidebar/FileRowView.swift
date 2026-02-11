@@ -103,9 +103,7 @@ struct FileRowView: View {
 
     /// File size formatted using ByteCountFormatter with file count style.
     private var formattedSize: String {
-        let formatter = ByteCountFormatter()
-        formatter.countStyle = .file
-        return formatter.string(fromByteCount: file.size)
+        ByteCountFormatter.string(fromByteCount: file.size, countStyle: .file)
     }
 
     /// Moves this file to the Trash via context menu.
