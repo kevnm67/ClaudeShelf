@@ -63,6 +63,7 @@ actor FileScanner {
         let startTime = Date()
         var allFiles: [DiscoveredFile] = []
         var allErrors: [String] = []
+        var visited = Set<String>()
 
         for location in locations {
             guard location.isEnabled else { continue }
@@ -80,11 +81,16 @@ actor FileScanner {
                 continue
             }
 
+            // Track the scan root to prevent cycles
+            let canonicalRoot = directoryURL.resolvingSymlinksInPath().path
+            visited.insert(canonicalRoot)
+
             let (files, errors) = scanDirectory(
                 at: directoryURL,
                 currentDepth: 0,
                 isInsideClaude: false,
-                claudeBaseURL: nil
+                claudeBaseURL: nil,
+                visited: &visited
             )
             allFiles.append(contentsOf: files)
             allErrors.append(contentsOf: errors)
@@ -165,18 +171,21 @@ actor FileScanner {
     ///   - isInsideClaude: Whether we are inside a `.claude/` directory tree.
     ///   - claudeBaseURL: The URL of the `.claude/` directory ancestor, used to
     ///     compute relative paths. Nil if not inside `.claude/`.
+    ///   - visited: Set of resolved canonical directory paths to detect symlink cycles.
     /// - Returns: A tuple of discovered files and non-fatal error messages.
     private func scanDirectory(
         at url: URL,
         currentDepth: Int,
         isInsideClaude: Bool,
-        claudeBaseURL: URL?
+        claudeBaseURL: URL?,
+        visited: inout Set<String>
     ) -> (files: [DiscoveredFile], errors: [String]) {
         var files: [DiscoveredFile] = []
         var errors: [String] = []
 
         let keys: [URLResourceKey] = [
             .isDirectoryKey,
+            .isSymbolicLinkKey,
             .fileSizeKey,
             .contentModificationDateKey,
             .isWritableKey,
@@ -211,6 +220,13 @@ actor FileScanner {
             }
 
             let isDirectory = resourceValues.isDirectory ?? false
+            let isSymlink = resourceValues.isSymbolicLink ?? false
+
+            // Skip symlinks to prevent loops and boundary escape
+            if isSymlink {
+                Self.logger.debug("Skipping symlink during scan")
+                continue
+            }
 
             if isDirectory {
                 // Skip known noise directories.
@@ -223,13 +239,22 @@ actor FileScanner {
                     continue
                 }
 
+                // Cycle detection: resolve canonical path and skip if already visited
+                let canonicalPath = itemURL.resolvingSymlinksInPath().path
+                if visited.contains(canonicalPath) {
+                    Self.logger.debug("Skipping already-visited directory to prevent cycle")
+                    continue
+                }
+                visited.insert(canonicalPath)
+
                 if itemName == ".claude" {
                     // Enter .claude with unlimited depth.
                     let (subFiles, subErrors) = scanDirectory(
                         at: itemURL,
                         currentDepth: 0,
                         isInsideClaude: true,
-                        claudeBaseURL: itemURL
+                        claudeBaseURL: itemURL,
+                        visited: &visited
                     )
                     files.append(contentsOf: subFiles)
                     errors.append(contentsOf: subErrors)
@@ -239,7 +264,8 @@ actor FileScanner {
                         at: itemURL,
                         currentDepth: currentDepth + 1,
                         isInsideClaude: true,
-                        claudeBaseURL: claudeBaseURL
+                        claudeBaseURL: claudeBaseURL,
+                        visited: &visited
                     )
                     files.append(contentsOf: subFiles)
                     errors.append(contentsOf: subErrors)
@@ -249,7 +275,8 @@ actor FileScanner {
                         at: itemURL,
                         currentDepth: currentDepth + 1,
                         isInsideClaude: false,
-                        claudeBaseURL: nil
+                        claudeBaseURL: nil,
+                        visited: &visited
                     )
                     files.append(contentsOf: subFiles)
                     errors.append(contentsOf: subErrors)
