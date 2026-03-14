@@ -10,7 +10,7 @@ orbs:
 references:
   workspace_root: &workspace_root /tmp/workspace
   xcode_version: &xcode_version "26.3.0"
-  resource_class: &resource_class macos.m4pro.medium
+  resource_class: &resource_class m4pro.medium
   homebrew_cache_key: &homebrew_cache_key v1-homebrew-{{ arch }}-{{ checksum "project.yml" }}
   homebrew_fallback_key: &homebrew_cache_fallback v1-homebrew-{{ arch }}-
   project_name: &project_name ClaudeShelf
