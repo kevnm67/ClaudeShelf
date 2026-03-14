@@ -5,6 +5,10 @@ on:
   pull_request:
     types: [opened, edited, synchronize]
 
+permissions:
+  pull-requests: write
+  contents: read
+
 jobs:
   jira:
     uses: kevnm67/engineering-toolkit/.github/workflows/reusable-jira-description.yml@main
