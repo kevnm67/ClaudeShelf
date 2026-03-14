@@ -1,0 +1,47 @@
+swift:
+  - changed-files:
+      - any-glob-to-any-file: '**/*.swift'
+
+ui:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'ClaudeShelf/Views/**'
+          - 'ClaudeShelf/Resources/**'
+
+models:
+  - changed-files:
+      - any-glob-to-any-file: 'ClaudeShelf/Models/**'
+
+services:
+  - changed-files:
+      - any-glob-to-any-file: 'ClaudeShelf/Services/**'
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'ClaudeShelfTests/**'
+          - 'ClaudeShelfUITests/**'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**'
+          - '.circleci/**'
+          - 'fastlane/**'
+          - 'project.yml'
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.md'
+          - 'wiki/**'
+
+config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.claude/**'
+          - '.swiftlint.yml'
+          - '.gitignore'
+          - 'project.yml'
+          - 'Makefile'
+          - '.pre-commit-config.yaml'

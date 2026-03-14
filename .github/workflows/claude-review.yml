@@ -1,0 +1,21 @@
+---
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+  id-token: write
+  actions: read
+
+jobs:
+  review:
+    uses: kevnm67/engineering-toolkit/.github/workflows/reusable-claude-review.yml@main
+    with:
+      review-prompt: "This is a native macOS SwiftUI app (Swift 6, macOS 15+). Focus on Swift concurrency safety, actor isolation, file permission handling (must preserve POSIX permissions), and SwiftUI best practices. No network layer should exist."
+    secrets:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

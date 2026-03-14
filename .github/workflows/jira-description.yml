@@ -1,0 +1,13 @@
+---
+name: Jira PR Description
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  jira:
+    uses: kevnm67/engineering-toolkit/.github/workflows/reusable-jira-description.yml@main
+    secrets:
+      JIRA_URL: ${{ secrets.JIRA_URL }}
+      JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}

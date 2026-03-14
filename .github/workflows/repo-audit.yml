@@ -1,0 +1,24 @@
+---
+name: Repo Audit
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Weekly Monday 9am UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  audit:
+    uses: kevnm67/engineering-toolkit/.github/workflows/reusable-repo-audit.yml@main
+    with:
+      stale-days: 30
+      close-days: 7
+      branch-stale-days: 30
+      exempt-labels: "pinned,security,bug"
+      audit-npm: false
+      check-todos: true
+      scan-secrets: true
