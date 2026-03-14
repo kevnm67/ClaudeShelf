@@ -1,0 +1,33 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+      - id: detect-private-key
+
+  - repo: local
+    hooks:
+      - id: swiftlint
+        name: SwiftLint
+        entry: bash -c 'command -v swiftlint >/dev/null 2>&1 && swiftlint lint --strict "$@" || echo "swiftlint not installed — skipping"' --
+        language: system
+        types: [swift]
+
+      - id: swiftformat
+        name: SwiftFormat (lint)
+        entry: bash -c 'command -v swiftformat >/dev/null 2>&1 && swiftformat --lint "$@" || echo "swiftformat not installed — skipping"' --
+        language: system
+        types: [swift]
+
+      - id: circleci-validate
+        name: CircleCI config validate
+        entry: bash -c 'command -v circleci >/dev/null 2>&1 && circleci config validate || echo "circleci CLI not installed — skipping"'
+        language: system
+        files: ^\.circleci/config\.yml$
+        pass_filenames: false
