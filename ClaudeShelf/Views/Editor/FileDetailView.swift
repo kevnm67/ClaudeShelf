@@ -197,6 +197,7 @@ struct FileDetailView: View {
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
                     .background(.fill.tertiary, in: Capsule())
+                    .accessibilityLabel("Category: \(file.category.displayName)")
 
                 // Scope badge
                 Text(scopeLabel)
@@ -204,6 +205,7 @@ struct FileDetailView: View {
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
                     .background(.fill.tertiary, in: Capsule())
+                    .accessibilityLabel("Scope: \(scopeLabel)")
 
                 Spacer()
 
@@ -211,11 +213,13 @@ struct FileDetailView: View {
                 Text(formattedSize)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .accessibilityLabel("Size: \(formattedSize)")
 
                 // Last modified date
                 Text(file.modifiedDate, style: .relative)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .accessibilityLabel("Last modified \(file.modifiedDate, style: .relative) ago")
             }
         }
         .padding()

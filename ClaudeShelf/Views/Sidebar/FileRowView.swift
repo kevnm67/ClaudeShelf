@@ -20,15 +20,16 @@ struct FileRowView: View {
         HStack(spacing: 8) {
             // Bulk selection checkbox
             if appState.isBulkSelectionMode {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.body)
-                    .foregroundStyle(isSelected ? Color.accentColor : .secondary)
-                    .frame(width: 20, alignment: .center)
-                    .onTapGesture {
-                        appState.toggleFileSelection(file.id)
-                    }
-                    .accessibilityLabel(isSelected ? "Selected" : "Not selected")
-                    .accessibilityAddTraits(.isButton)
+                Button {
+                    appState.toggleFileSelection(file.id)
+                } label: {
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .font(.body)
+                        .foregroundStyle(isSelected ? Color.accentColor : .secondary)
+                        .frame(width: 20, alignment: .center)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isSelected ? "Deselect \(file.displayName)" : "Select \(file.displayName)")
             }
 
             Image(systemName: file.category.sfSymbol)
@@ -71,6 +72,8 @@ struct FileRowView: View {
             }
         }
         .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(file.displayName), \(file.category.displayName), \(formattedSize)\(file.isReadOnly ? ", read-only" : "")")
         .contextMenu {
             Button {
                 if !appState.isBulkSelectionMode {

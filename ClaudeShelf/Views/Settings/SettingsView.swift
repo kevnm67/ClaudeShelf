@@ -32,6 +32,7 @@ struct SettingsView: View {
                                     .foregroundStyle(.red)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel("Remove \(location.displayName)")
                         }
                     }
                 }
