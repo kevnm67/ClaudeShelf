@@ -5,8 +5,7 @@ import Foundation
 /// Claude encodes project paths as directory names under `~/.claude/projects/`.
 /// For example, `~/.claude/projects/-home-user-Projects-MyApp/` encodes the
 /// project path `/home/user/Projects/MyApp`, and the project name is "MyApp".
-struct PathDecoder: Sendable {
-
+enum PathDecoder {
     // MARK: - Constants
 
     /// Common path segments that are stripped when decoding project names.
@@ -36,9 +35,9 @@ struct PathDecoder: Sendable {
 
         // Filter out common prefixes and single-character segments (drive letters).
         let meaningful = segments.filter { segment in
-            let s = String(segment)
-            if s.count <= 1 { return false }
-            if commonPrefixes.contains(s) { return false }
+            let part = String(segment)
+            if part.count <= 1 { return false }
+            if commonPrefixes.contains(part) { return false }
             return true
         }
 
@@ -104,7 +103,7 @@ struct PathDecoder: Sendable {
         if fileName == "CLAUDE.md" {
             let parentDir = (path as NSString).deletingLastPathComponent
             let projectName = (parentDir as NSString).lastPathComponent
-            if !projectName.isEmpty && projectName != "/" {
+            if !projectName.isEmpty, projectName != "/" {
                 return (.project, projectName)
             }
         }

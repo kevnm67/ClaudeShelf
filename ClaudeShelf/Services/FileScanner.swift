@@ -20,11 +20,23 @@ struct DiscoveredFile: Sendable {
     let claudeRelativePath: String?
 }
 
+/// Result of scanning locations for discovered files.
+struct ScanLocationResult: Sendable {
+    let files: [DiscoveredFile]
+    let duration: TimeInterval
+    let errors: [String]
+}
+
+/// Accumulator for files and errors discovered during a directory scan.
+private struct DirectoryScanResult {
+    var files: [DiscoveredFile] = []
+    var errors: [String] = []
+}
+
 /// Core file discovery engine that walks directories, applies skip rules,
 /// respects depth limits, and discovers files matching known Claude
 /// configuration extensions.
 actor FileScanner {
-
     // MARK: - Constants
 
     /// Known Claude config file extensions (without leading dot).
@@ -56,10 +68,10 @@ actor FileScanner {
     /// Scans all enabled locations and returns discovered files with timing info.
     ///
     /// - Parameter locations: The scan locations to enumerate.
-    /// - Returns: A list of discovered files, scan duration, and any non-fatal errors.
+    /// - Returns: A ``ScanLocationResult`` with discovered files, duration, and errors.
     func scanLocations(
         _ locations: [ScanLocation]
-    ) async -> (files: [DiscoveredFile], duration: TimeInterval, errors: [String]) {
+    ) async -> ScanLocationResult {
         let startTime = Date()
         var allFiles: [DiscoveredFile] = []
         var allErrors: [String] = []
@@ -85,19 +97,21 @@ actor FileScanner {
             let canonicalRoot = directoryURL.resolvingSymlinksInPath().path
             visited.insert(canonicalRoot)
 
-            let (files, errors) = scanDirectory(
+            var dirResult = DirectoryScanResult()
+            scanDirectory(
                 at: directoryURL,
                 currentDepth: 0,
                 isInsideClaude: false,
                 claudeBaseURL: nil,
-                visited: &visited
+                visited: &visited,
+                result: &dirResult
             )
-            allFiles.append(contentsOf: files)
-            allErrors.append(contentsOf: errors)
+            allFiles.append(contentsOf: dirResult.files)
+            allErrors.append(contentsOf: dirResult.errors)
         }
 
         let duration = Date().timeIntervalSince(startTime)
-        return (allFiles, duration, allErrors)
+        return ScanLocationResult(files: allFiles, duration: duration, errors: allErrors)
     }
 
     /// Performs a full scan across all enabled locations and returns categorized
@@ -112,40 +126,13 @@ actor FileScanner {
     func scan(locations: [ScanLocation]) async -> ScanResult {
         let homeDir = FileManager.default.homeDirectoryForCurrentUser.path
 
-        let result = await scanLocations(locations)
+        let scanResult = await scanLocations(locations)
 
         var entries: [FileEntry] = []
-        entries.reserveCapacity(result.files.count)
+        entries.reserveCapacity(scanResult.files.count)
 
-        for file in result.files {
-            let category = CategoryAssigner.assignCategory(
-                fileName: file.name,
-                path: file.url.path,
-                isInsideClaude: file.isInsideClaude
-            )
-
-            let (scope, project) = PathDecoder.detectScope(
-                for: file.url.path,
-                homeDirectory: homeDir
-            )
-
-            let displayName = PathDecoder.displayName(
-                for: file.name,
-                project: project
-            )
-
-            let entry = FileEntry(
-                id: FileEntry.generateID(from: file.url.path),
-                name: file.name,
-                path: file.url.path,
-                displayName: displayName,
-                category: category,
-                scope: scope,
-                project: project,
-                size: file.size,
-                modifiedDate: file.modifiedDate,
-                isReadOnly: file.isReadOnly
-            )
+        for file in scanResult.files {
+            let entry = buildFileEntry(from: file, homeDirectory: homeDir)
             entries.append(entry)
         }
 
@@ -156,8 +143,43 @@ actor FileScanner {
         return ScanResult(
             files: entries,
             scanDate: Date(),
-            duration: result.duration,
-            errors: result.errors
+            duration: scanResult.duration,
+            errors: scanResult.errors
+        )
+    }
+
+    /// Converts a discovered file into a categorized ``FileEntry``.
+    private func buildFileEntry(
+        from file: DiscoveredFile,
+        homeDirectory: String
+    ) -> FileEntry {
+        let category = CategoryAssigner.assignCategory(
+            fileName: file.name,
+            path: file.url.path,
+            isInsideClaude: file.isInsideClaude
+        )
+
+        let (scope, project) = PathDecoder.detectScope(
+            for: file.url.path,
+            homeDirectory: homeDirectory
+        )
+
+        let displayName = PathDecoder.displayName(
+            for: file.name,
+            project: project
+        )
+
+        return FileEntry(
+            id: FileEntry.generateID(from: file.url.path),
+            name: file.name,
+            path: file.url.path,
+            displayName: displayName,
+            category: category,
+            scope: scope,
+            project: project,
+            size: file.size,
+            modifiedDate: file.modifiedDate,
+            isReadOnly: file.isReadOnly
         )
     }
 
@@ -172,18 +194,16 @@ actor FileScanner {
     ///   - claudeBaseURL: The URL of the `.claude/` directory ancestor, used to
     ///     compute relative paths. Nil if not inside `.claude/`.
     ///   - visited: Set of resolved canonical directory paths to detect symlink cycles.
-    /// - Returns: A tuple of discovered files and non-fatal error messages.
+    ///   - result: Accumulator for discovered files and errors.
     private func scanDirectory(
         at url: URL,
         currentDepth: Int,
         isInsideClaude: Bool,
         claudeBaseURL: URL?,
-        visited: inout Set<String>
-    ) -> (files: [DiscoveredFile], errors: [String]) {
-        var files: [DiscoveredFile] = []
-        var errors: [String] = []
-
-        let keys: [URLResourceKey] = [
+        visited: inout Set<String>,
+        result: inout DirectoryScanResult
+    ) {
+        let keys: Set<URLResourceKey> = [
             .isDirectoryKey,
             .isSymbolicLinkKey,
             .fileSizeKey,
@@ -195,136 +215,139 @@ actor FileScanner {
         do {
             contents = try FileManager.default.contentsOfDirectory(
                 at: url,
-                includingPropertiesForKeys: keys,
+                includingPropertiesForKeys: Array(keys),
                 options: []
             )
         } catch {
             let message = "Failed to read directory \(url.path): \(error.localizedDescription)"
             Self.logger.error("\(message, privacy: .public)")
-            return ([], [message])
+            result.errors.append(message)
+            return
         }
 
         for itemURL in contents {
-            let itemName = itemURL.lastPathComponent
-
             let resourceValues: URLResourceValues
             do {
-                resourceValues = try itemURL.resourceValues(
-                    forKeys: Set(keys)
-                )
+                resourceValues = try itemURL.resourceValues(forKeys: keys)
             } catch {
                 let message = "Failed to read attributes for \(itemURL.path): \(error.localizedDescription)"
                 Self.logger.error("\(message, privacy: .public)")
-                errors.append(message)
+                result.errors.append(message)
                 continue
             }
 
-            let isDirectory = resourceValues.isDirectory ?? false
-            let isSymlink = resourceValues.isSymbolicLink ?? false
-
             // Skip symlinks to prevent loops and boundary escape
-            if isSymlink {
+            if resourceValues.isSymbolicLink ?? false {
                 Self.logger.debug("Skipping symlink during scan")
                 continue
             }
 
-            if isDirectory {
-                // Skip known noise directories.
-                if Self.skipDirectories.contains(itemName) {
-                    continue
-                }
-
-                // Skip hidden directories except `.claude`.
-                if itemName.hasPrefix(".") && itemName != ".claude" {
-                    continue
-                }
-
-                // Cycle detection: resolve canonical path and skip if already visited
-                let canonicalPath = itemURL.resolvingSymlinksInPath().path
-                if visited.contains(canonicalPath) {
-                    Self.logger.debug("Skipping already-visited directory to prevent cycle")
-                    continue
-                }
-                visited.insert(canonicalPath)
-
-                if itemName == ".claude" {
-                    // Enter .claude with unlimited depth.
-                    let (subFiles, subErrors) = scanDirectory(
-                        at: itemURL,
-                        currentDepth: 0,
-                        isInsideClaude: true,
-                        claudeBaseURL: itemURL,
-                        visited: &visited
-                    )
-                    files.append(contentsOf: subFiles)
-                    errors.append(contentsOf: subErrors)
-                } else if isInsideClaude {
-                    // Inside .claude — no depth limit, recurse freely.
-                    let (subFiles, subErrors) = scanDirectory(
-                        at: itemURL,
-                        currentDepth: currentDepth + 1,
-                        isInsideClaude: true,
-                        claudeBaseURL: claudeBaseURL,
-                        visited: &visited
-                    )
-                    files.append(contentsOf: subFiles)
-                    errors.append(contentsOf: subErrors)
-                } else if currentDepth < Self.maxDepth {
-                    // Outside .claude — respect depth limit.
-                    let (subFiles, subErrors) = scanDirectory(
-                        at: itemURL,
-                        currentDepth: currentDepth + 1,
-                        isInsideClaude: false,
-                        claudeBaseURL: nil,
-                        visited: &visited
-                    )
-                    files.append(contentsOf: subFiles)
-                    errors.append(contentsOf: subErrors)
-                }
+            if resourceValues.isDirectory ?? false {
+                recurseIntoDirectory(
+                    itemURL,
+                    currentDepth: currentDepth,
+                    isInsideClaude: isInsideClaude,
+                    claudeBaseURL: claudeBaseURL,
+                    visited: &visited,
+                    result: &result
+                )
             } else {
-                // It's a file. Check if we should include it.
-                let shouldInclude: Bool
-                if isInsideClaude {
-                    let ext = itemURL.pathExtension.lowercased()
-                    shouldInclude = Self.knownExtensions.contains(ext)
-                } else if Self.specialFiles.contains(itemName) {
-                    shouldInclude = true
-                } else {
-                    shouldInclude = false
-                }
-
-                if shouldInclude {
-                    let fileSize = Int64(resourceValues.fileSize ?? 0)
-                    let modDate = resourceValues.contentModificationDate ?? Date.distantPast
-                    let isReadOnly = !(resourceValues.isWritable ?? true)
-
-                    var relativePath: String?
-                    if let base = claudeBaseURL {
-                        let basePath = base.path
-                        let filePath = itemURL.path
-                        if filePath.hasPrefix(basePath) {
-                            var rel = String(filePath.dropFirst(basePath.count))
-                            if rel.hasPrefix("/") {
-                                rel = String(rel.dropFirst())
-                            }
-                            relativePath = rel
-                        }
-                    }
-
-                    let discovered = DiscoveredFile(
-                        url: itemURL,
-                        name: itemName,
-                        size: fileSize,
-                        modifiedDate: modDate,
-                        isReadOnly: isReadOnly,
-                        isInsideClaude: isInsideClaude,
-                        claudeRelativePath: relativePath
-                    )
-                    files.append(discovered)
-                }
+                collectFileIfRecognized(
+                    itemURL,
+                    resourceValues: resourceValues,
+                    isInsideClaude: isInsideClaude,
+                    claudeBaseURL: claudeBaseURL,
+                    result: &result
+                )
             }
         }
+    }
 
-        return (files, errors)
+    /// Handles recursion into a subdirectory, applying skip and depth rules.
+    private func recurseIntoDirectory(
+        _ itemURL: URL,
+        currentDepth: Int,
+        isInsideClaude: Bool,
+        claudeBaseURL: URL?,
+        visited: inout Set<String>,
+        result: inout DirectoryScanResult
+    ) {
+        let itemName = itemURL.lastPathComponent
+
+        // Skip known noise directories.
+        guard !Self.skipDirectories.contains(itemName) else { return }
+
+        // Skip hidden directories except `.claude`.
+        guard !itemName.hasPrefix(".") || itemName == ".claude" else { return }
+
+        // Cycle detection: resolve canonical path and skip if already visited
+        let canonicalPath = itemURL.resolvingSymlinksInPath().path
+        guard !visited.contains(canonicalPath) else {
+            Self.logger.debug("Skipping already-visited directory to prevent cycle")
+            return
+        }
+        visited.insert(canonicalPath)
+
+        if itemName == ".claude" {
+            scanDirectory(
+                at: itemURL, currentDepth: 0, isInsideClaude: true,
+                claudeBaseURL: itemURL, visited: &visited, result: &result
+            )
+        } else if isInsideClaude {
+            scanDirectory(
+                at: itemURL, currentDepth: currentDepth + 1, isInsideClaude: true,
+                claudeBaseURL: claudeBaseURL, visited: &visited, result: &result
+            )
+        } else if currentDepth < Self.maxDepth {
+            scanDirectory(
+                at: itemURL, currentDepth: currentDepth + 1, isInsideClaude: false,
+                claudeBaseURL: nil, visited: &visited, result: &result
+            )
+        }
+    }
+
+    /// Checks if a file matches recognition rules and adds it to the result.
+    private func collectFileIfRecognized(
+        _ itemURL: URL,
+        resourceValues: URLResourceValues,
+        isInsideClaude: Bool,
+        claudeBaseURL: URL?,
+        result: inout DirectoryScanResult
+    ) {
+        let itemName = itemURL.lastPathComponent
+
+        let shouldInclude: Bool = if isInsideClaude {
+            Self.knownExtensions.contains(itemURL.pathExtension.lowercased())
+        } else {
+            Self.specialFiles.contains(itemName)
+        }
+
+        guard shouldInclude else { return }
+
+        let relativePath = claudeRelativePath(for: itemURL, claudeBaseURL: claudeBaseURL)
+
+        let discovered = DiscoveredFile(
+            url: itemURL,
+            name: itemName,
+            size: Int64(resourceValues.fileSize ?? 0),
+            modifiedDate: resourceValues.contentModificationDate ?? Date.distantPast,
+            isReadOnly: !(resourceValues.isWritable ?? true),
+            isInsideClaude: isInsideClaude,
+            claudeRelativePath: relativePath
+        )
+        result.files.append(discovered)
+    }
+
+    /// Computes the path relative to the `.claude/` base directory.
+    private func claudeRelativePath(for itemURL: URL, claudeBaseURL: URL?) -> String? {
+        guard let base = claudeBaseURL else { return nil }
+        let basePath = base.path
+        let filePath = itemURL.path
+        guard filePath.hasPrefix(basePath) else { return nil }
+        var rel = String(filePath.dropFirst(basePath.count))
+        if rel.hasPrefix("/") {
+            rel = String(rel.dropFirst())
+        }
+        return rel
     }
 }

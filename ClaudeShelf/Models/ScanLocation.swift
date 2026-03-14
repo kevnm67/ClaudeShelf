@@ -48,10 +48,10 @@ struct ScanLocation: Identifiable, Hashable, Sendable, Codable {
     ///
     /// - Parameter userPath: The absolute filesystem path to scan.
     init(userPath: String) {
-        self.id = UUID()
-        self.path = userPath
-        self.isEnabled = true
-        self.isDefault = false
+        id = UUID()
+        path = userPath
+        isEnabled = true
+        isDefault = false
     }
 
     /// The 8 default scan locations from the project specification.

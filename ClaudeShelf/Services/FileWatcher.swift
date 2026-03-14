@@ -7,8 +7,13 @@ import os
 /// and the FSEvents C callback cannot capture Swift closures directly.
 private final class FileWatcherContext: @unchecked Sendable {
     let onEvent: @Sendable () -> Void
-    init(onEvent: @escaping @Sendable () -> Void) { self.onEvent = onEvent }
-    func notify() { onEvent() }
+    init(onEvent: @escaping @Sendable () -> Void) {
+        self.onEvent = onEvent
+    }
+
+    func notify() {
+        onEvent()
+    }
 }
 
 /// Monitors directories for filesystem changes and notifies via callback.
@@ -28,8 +33,7 @@ actor FileWatcher {
     }
 
     /// C callback for FSEvents — dispatches to the actor via the context pointer.
-    private static let eventCallback: FSEventStreamCallback = {
-        (streamRef, clientCallBackInfo, numEvents, eventPaths, eventFlags, eventIds) in
+    private static let eventCallback: FSEventStreamCallback = { _, clientCallBackInfo, _, _, _, _ in
         guard let info = clientCallBackInfo else { return }
         let context = Unmanaged<FileWatcherContext>.fromOpaque(info).takeUnretainedValue()
         context.notify()
@@ -53,7 +57,7 @@ actor FileWatcher {
                 await self.handleEvent()
             }
         }
-        self.callbackContext = context
+        callbackContext = context
 
         var streamContext = FSEventStreamContext(
             version: 0,
@@ -84,7 +88,7 @@ actor FileWatcher {
 
         FSEventStreamSetDispatchQueue(stream, DispatchQueue.global(qos: .utility))
         FSEventStreamStart(stream)
-        self.streamRef = stream
+        streamRef = stream
 
         Self.logger.info("File watcher started for \(directories.count) directories")
     }
@@ -126,5 +130,4 @@ actor FileWatcher {
         Self.logger.info("File changes detected, triggering refresh")
         await onChange()
     }
-
 }

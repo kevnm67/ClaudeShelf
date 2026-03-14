@@ -1,0 +1,11 @@
+--swiftversion 6.0
+--indent 4
+--allman false
+--self remove
+--selfrequired init
+--importgrouping alpha
+--semicolons never
+--trailingCommas always
+--wraparguments before-first
+--maxwidth 120
+--disable redundantSendable
