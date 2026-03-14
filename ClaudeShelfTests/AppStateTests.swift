@@ -1,23 +1,6 @@
 import XCTest
 @testable import ClaudeShelf
 
-/// In-memory implementation of ScanLocationStoring for testing.
-/// Avoids polluting UserDefaults.
-///
-/// Marked @unchecked Sendable because mutable state is only accessed
-/// from the @MainActor test context (single-threaded test execution).
-private final class MockScanLocationStore: ScanLocationStoring, @unchecked Sendable {
-    private var stored: [ScanLocation]?
-
-    func load(defaults: [ScanLocation]) -> [ScanLocation] {
-        stored ?? defaults
-    }
-
-    func save(_ locations: [ScanLocation]) {
-        stored = locations
-    }
-}
-
 /// Alias to disambiguate ClaudeShelf.Category from ObjC Category typedef.
 private typealias FileCategory = ClaudeShelf.Category
 
@@ -41,17 +24,12 @@ final class AppStateTests: XCTestCase {
         category: FileCategory = .projectConfig,
         scope: Scope = .global
     ) -> FileEntry {
-        FileEntry(
-            id: FileEntry.generateID(from: path),
+        TestFileEntryFactory.make(
             name: name,
             path: path,
-            displayName: name,
             category: category,
             scope: scope,
-            project: nil,
-            size: 100,
-            modifiedDate: Date(),
-            isReadOnly: false
+            project: nil
         )
     }
 
@@ -205,5 +183,109 @@ final class AppStateTests: XCTestCase {
         XCTAssertEqual(appState.files.first?.id, entry2.id)
         XCTAssertFalse(appState.selectedFileIDs.contains(entry1.id), "Removed file should be cleared from selection")
         XCTAssertTrue(appState.selectedFileIDs.contains(entry2.id), "Non-removed file should remain selected")
+    }
+
+    // MARK: - Category Sizes
+
+    func testCategorySizesComputed() {
+        let entry1 = makeEntry(name: "a.json", path: "/tmp/a.json", category: .settings)
+        let entry2 = makeEntry(name: "b.json", path: "/tmp/b.json", category: .settings)
+        let entry3 = makeEntry(name: "c.md", path: "/tmp/c.md", category: .memory)
+        appState.files = [
+            TestFileEntryFactory.make(name: "a.json", path: "/tmp/a.json", category: .settings, project: nil, size: 200),
+            TestFileEntryFactory.make(name: "b.json", path: "/tmp/b.json", category: .settings, project: nil, size: 300),
+            TestFileEntryFactory.make(name: "c.md", path: "/tmp/c.md", category: .memory, project: nil, size: 150),
+        ]
+
+        let sizes = appState.categorySizes
+        XCTAssertEqual(sizes[.settings], 500)
+        XCTAssertEqual(sizes[.memory], 150)
+        XCTAssertNil(sizes[.agents])
+    }
+
+    // MARK: - Selected Files Computed Property
+
+    func testSelectedFilesReturnsCorrectEntries() {
+        let entry1 = makeEntry(name: "a.md", path: "/tmp/a.md")
+        let entry2 = makeEntry(name: "b.md", path: "/tmp/b.md")
+        let entry3 = makeEntry(name: "c.md", path: "/tmp/c.md")
+        appState.files = [entry1, entry2, entry3]
+
+        appState.toggleFileSelection(entry1.id)
+        appState.toggleFileSelection(entry3.id)
+
+        let selected = appState.selectedFiles
+        XCTAssertEqual(selected.count, 2)
+        let selectedIDs = Set(selected.map(\.id))
+        XCTAssertTrue(selectedIDs.contains(entry1.id))
+        XCTAssertTrue(selectedIDs.contains(entry3.id))
+        XCTAssertFalse(selectedIDs.contains(entry2.id))
+    }
+
+    // MARK: - Search + Category Combined Filtering
+
+    func testFilterByCategoryAndSearchText() {
+        appState.files = [
+            makeEntry(name: "settings.json", path: "/tmp/settings.json", category: .settings),
+            makeEntry(name: "other-settings.json", path: "/tmp/other-settings.json", category: .settings),
+            makeEntry(name: "memory.md", path: "/tmp/memory.md", category: .memory),
+        ]
+
+        appState.selectedCategory = .settings
+        appState.searchText = "other"
+
+        let filtered = appState.filteredFiles
+        XCTAssertEqual(filtered.count, 1)
+        XCTAssertEqual(filtered.first?.name, "other-settings.json")
+    }
+
+    // MARK: - Store Persistence
+
+    func testAddScanLocationPersistsToStore() {
+        let initialSaveCount = store.saveCallCount
+        appState.addScanLocation(path: "/tmp/persist-test-\(UUID().uuidString)")
+        XCTAssertGreaterThan(store.saveCallCount, initialSaveCount, "Adding a location should trigger a save")
+    }
+
+    func testToggleScanLocationPersistsToStore() {
+        let initialSaveCount = store.saveCallCount
+        guard let firstLocation = appState.scanLocations.first else {
+            XCTFail("No scan locations")
+            return
+        }
+        appState.toggleScanLocation(id: firstLocation.id)
+        XCTAssertGreaterThan(store.saveCallCount, initialSaveCount, "Toggling a location should trigger a save")
+    }
+
+    // MARK: - Remove Files Clears Selected File
+
+    func testRemoveFilesClearsSelectedFile() {
+        let entry = makeEntry(name: "selected.md", path: "/tmp/selected.md")
+        appState.files = [entry]
+        // Note: selectedFile setter refreshes from disk, which won't work for a fake path.
+        // We test removeFiles behavior on the files array and selection IDs instead.
+        appState.toggleFileSelection(entry.id)
+        appState.removeFiles([entry])
+
+        XCTAssertTrue(appState.files.isEmpty)
+        XCTAssertFalse(appState.selectedFileIDs.contains(entry.id))
+    }
+
+    // MARK: - Toggle Nonexistent Location
+
+    func testToggleNonexistentLocationIsNoOp() {
+        let bogusID = UUID()
+        let before = appState.scanLocations
+        appState.toggleScanLocation(id: bogusID)
+        XCTAssertEqual(appState.scanLocations, before)
+    }
+
+    // MARK: - Remove Nonexistent Location
+
+    func testRemoveNonexistentLocationIsNoOp() {
+        let bogusID = UUID()
+        let before = appState.scanLocations
+        appState.removeScanLocation(id: bogusID)
+        XCTAssertEqual(appState.scanLocations, before)
     }
 }

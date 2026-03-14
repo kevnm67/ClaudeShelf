@@ -10,20 +10,7 @@ private actor CallCounter {
     }
 }
 
-final class FileWatcherTests: XCTestCase {
-
-    private var tempDir: URL!
-
-    override func setUp() {
-        super.setUp()
-        tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-    }
-
-    override func tearDown() {
-        try? FileManager.default.removeItem(at: tempDir)
-        super.tearDown()
-    }
+final class FileWatcherTests: TempDirectoryTestCase {
 
     func testWatcherStartsAndStops() async {
         let watcher = FileWatcher(debounceInterval: 0.1)

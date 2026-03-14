@@ -14,17 +14,13 @@ final class CleanupAnalyzerTests: XCTestCase {
         modifiedDate: Date = Date(),
         category: ClaudeShelf.Category = .other
     ) -> FileEntry {
-        FileEntry(
+        TestFileEntryFactory.make(
             id: id,
             name: name,
             path: path,
-            displayName: name,
             category: category,
-            scope: .project,
-            project: "TestProject",
             size: size,
-            modifiedDate: modifiedDate,
-            isReadOnly: false
+            modifiedDate: modifiedDate
         )
     }
 

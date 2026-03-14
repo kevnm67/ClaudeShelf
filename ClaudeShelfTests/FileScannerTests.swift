@@ -1,33 +1,16 @@
 import XCTest
 @testable import ClaudeShelf
 
-final class FileScannerTests: XCTestCase {
+final class FileScannerTests: TempDirectoryTestCase {
 
-    private var tempDir: URL!
     private var scanner: FileScanner!
 
     override func setUp() {
         super.setUp()
-        tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("FileScannerTests-\(UUID().uuidString)")
-        try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
         scanner = FileScanner()
     }
 
-    override func tearDown() {
-        try? FileManager.default.removeItem(at: tempDir)
-        super.tearDown()
-    }
-
     // MARK: - Helpers
-
-    /// Creates a file at the given path relative to tempDir.
-    private func createFile(_ relativePath: String, content: String = "test") {
-        let fileURL = tempDir.appendingPathComponent(relativePath)
-        let dir = fileURL.deletingLastPathComponent()
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        try? content.write(to: fileURL, atomically: true, encoding: .utf8)
-    }
 
     /// Returns an enabled ScanLocation pointing at tempDir.
     private func scanLocation() -> ScanLocation {
