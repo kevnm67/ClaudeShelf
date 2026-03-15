@@ -119,6 +119,7 @@ struct DiffView: View {
         .padding(.vertical, 1)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(backgroundColor(for: line))
+        .accessibilityLabel(accessibilityDescription(for: line))
     }
 
     @ViewBuilder
@@ -140,10 +141,10 @@ struct DiffView: View {
 
     // MARK: - Styling
 
-    private let addedForeground = Color.green
-    private let addedBackground = Color.green.opacity(0.1)
-    private let removedForeground = Color.red
-    private let removedBackground = Color.red.opacity(0.1)
+    private let addedForeground = Color(nsColor: .systemGreen)
+    private let addedBackground = Color(nsColor: .systemGreen).opacity(0.12)
+    private let removedForeground = Color(nsColor: .systemRed)
+    private let removedBackground = Color(nsColor: .systemRed).opacity(0.12)
 
     private func foregroundColor(for line: DiffLine) -> Color {
         switch line {
@@ -158,6 +159,17 @@ struct DiffView: View {
         case .unchanged: .clear
         case .added: addedBackground
         case .removed: removedBackground
+        }
+    }
+
+    private func accessibilityDescription(for line: DiffLine) -> String {
+        switch line {
+        case .unchanged(_, let text):
+            return "Unchanged: \(text)"
+        case .added(_, let text):
+            return "Added: \(text)"
+        case .removed(_, let text):
+            return "Removed: \(text)"
         }
     }
 

@@ -18,5 +18,13 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>ClaudeShelf scans your Desktop for Claude configuration files.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>ClaudeShelf scans your Documents folder for Claude configuration files.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>ClaudeShelf scans your Downloads folder for Claude configuration files.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>ClaudeShelf scans your home directory for Claude configuration files.</string>
 </dict>
 </plist>

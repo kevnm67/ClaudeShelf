@@ -1,0 +1,14 @@
+---
+name: PR Summary
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  summary:
+    uses: kevnm67/engineering-toolkit/.github/workflows/reusable-pr-summary.yml@main

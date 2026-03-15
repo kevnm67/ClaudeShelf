@@ -24,7 +24,6 @@ struct ContentView: View {
         } detail: {
             detailColumn
         }
-        .navigationTitle("ClaudeShelf")
         .searchable(text: $appState.searchText, prompt: "Search files...")
         .toolbar {
             ToolbarItem(placement: .automatic) {

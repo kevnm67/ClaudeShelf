@@ -19,12 +19,13 @@ struct SidebarView: View {
                     Spacer()
                     Text("\(appState.files.count)")
                         .foregroundStyle(.secondary)
-                        .font(.callout)
+                        .font(.callout.monospacedDigit())
                 }
             } icon: {
                 Image(systemName: "tray.full")
             }
             .tag(Category?.none)
+            .accessibilityLabel("All Files, \(appState.files.count) items")
 
             // Category rows — only shown when they have files
             Section("Categories") {
@@ -37,16 +38,18 @@ struct SidebarView: View {
                                 Spacer()
                                 Text("\(count)")
                                     .foregroundStyle(.secondary)
-                                    .font(.callout)
+                                    .font(.callout.monospacedDigit())
                             }
                         } icon: {
                             Image(systemName: category.sfSymbol)
                         }
                         .tag(Category?.some(category))
+                        .accessibilityLabel("\(category.displayName), \(count) items")
                     }
                 }
             }
         }
+        .listStyle(.sidebar)
         .navigationTitle("ClaudeShelf")
     }
 }

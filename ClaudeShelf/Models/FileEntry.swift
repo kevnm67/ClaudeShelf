@@ -1,5 +1,5 @@
-import Foundation
 import CryptoKit
+import Foundation
 
 /// Represents a single Claude configuration file discovered during scanning.
 struct FileEntry: Identifiable, Hashable, Sendable {

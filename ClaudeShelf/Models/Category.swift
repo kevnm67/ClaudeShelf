@@ -14,7 +14,9 @@ enum Category: String, CaseIterable, Identifiable, Sendable, Codable {
     case skills
     case other
 
-    var id: String { rawValue }
+    var id: String {
+        rawValue
+    }
 
     /// Human-readable display name for the category.
     var displayName: String {

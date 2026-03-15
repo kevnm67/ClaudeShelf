@@ -1,16 +1,16 @@
 name: ClaudeShelf
 options:
-  bundleIdPrefix: com.kjm
+  bundleIdPrefix: com.kevinmorton
   deploymentTarget:
     macOS: "15.0"
-  xcodeVersion: "16.0"
+  xcodeVersion: "26.3"
   createIntermediateGroups: true
   generateEmptyDirectories: false
   developmentLanguage: en
 
 settings:
   base:
-    SWIFT_VERSION: "6.0"
+    SWIFT_VERSION: "6.2"
     SWIFT_STRICT_CONCURRENCY: complete
     MACOSX_DEPLOYMENT_TARGET: "15.0"
 
@@ -24,7 +24,7 @@ targets:
           - "**/.DS_Store"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.kjm.ClaudeShelf
+        PRODUCT_BUNDLE_IDENTIFIER: com.kevinmorton.ClaudeShelf
         PRODUCT_NAME: ClaudeShelf
         INFOPLIST_FILE: ClaudeShelf/Info.plist
         CODE_SIGN_ENTITLEMENTS: ClaudeShelf/ClaudeShelf.entitlements
@@ -44,7 +44,7 @@ targets:
       - target: ClaudeShelf
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.kjm.ClaudeShelfTests
+        PRODUCT_BUNDLE_IDENTIFIER: com.kevinmorton.ClaudeShelfTests
         GENERATE_INFOPLIST_FILE: true
 
 schemes:

@@ -1,75 +1,172 @@
 version: 2.1
 
 orbs:
-  macos: circleci/macos@2.5.2
+  macos: circleci/macos@2.5.4
+  qlty: qltysh/qlty-orb@0.1.1
 
+# ---------------------------------------------------------------------------
+# YAML Anchors — DRY shared snippets
+# ---------------------------------------------------------------------------
+references:
+  workspace_root: &workspace_root /tmp/workspace
+  xcode_version: &xcode_version "26.3.0"
+  resource_class: &resource_class m4pro.medium
+  homebrew_cache_key: &homebrew_cache_key v1-homebrew-{{ arch }}-{{ checksum "project.yml" }}
+  homebrew_fallback_key: &homebrew_cache_fallback v1-homebrew-{{ arch }}-
+  project_name: &project_name ClaudeShelf
+  scheme: &scheme ClaudeShelf
+  destination: &destination "platform=macOS"
+
+# ---------------------------------------------------------------------------
+# Executors
+# ---------------------------------------------------------------------------
 executors:
   macos-executor:
     macos:
-      xcode: "16.2.0"
-    resource_class: macos.m1.medium.gen1
+      xcode: *xcode_version
+    resource_class: *resource_class
 
+# ---------------------------------------------------------------------------
+# Commands
+# ---------------------------------------------------------------------------
 commands:
   install-tools:
-    description: Install XcodeGen and dependencies
+    description: Install XcodeGen, xcbeautify, xcresultparser and generate the Xcode project
     steps:
+      - restore_cache:
+          keys:
+            - *homebrew_cache_key
+            - *homebrew_cache_fallback
       - run:
-          name: Install XcodeGen
-          command: brew install xcodegen
+          name: Install Homebrew dependencies
+          command: |
+            brew install xcodegen xcbeautify xcresultparser
+            brew link --overwrite xcodegen xcbeautify xcresultparser
+      - save_cache:
+          key: *homebrew_cache_key
+          paths:
+            - ~/Library/Caches/Homebrew
+            - /opt/homebrew/Cellar/xcodegen
+            - /opt/homebrew/Cellar/xcbeautify
+            - /opt/homebrew/Cellar/xcresultparser
       - run:
           name: Generate Xcode project
           command: xcodegen generate
 
+  run-build:
+    description: Build the project (Debug)
+    steps:
+      - run:
+          name: Build (Debug)
+          command: |
+            set -o pipefail
+            xcodebuild build \
+              -project ClaudeShelf.xcodeproj \
+              -scheme ClaudeShelf \
+              -destination 'platform=macOS' \
+              | xcbeautify
+
   run-tests:
-    description: Build and run unit tests
+    description: Build and run unit tests with coverage
     steps:
       - run:
           name: Run tests
           command: |
+            set -o pipefail
             xcodebuild test \
               -project ClaudeShelf.xcodeproj \
               -scheme ClaudeShelf \
               -destination 'platform=macOS' \
+              -enableCodeCoverage YES \
               -resultBundlePath TestResults.xcresult \
-              | xcbeautify || true
+              | xcbeautify
+      - run:
+          name: Convert test results to JUnit XML
+          when: always
+          command: |
+            xcresultparser --output-format junit TestResults.xcresult > TestResults.xml
       - store_test_results:
+          path: TestResults.xml
+      - store_artifacts:
           path: TestResults.xcresult
+          destination: xcresult
+      - run:
+          name: Extract coverage report
+          when: always
+          command: |
+            xcrun xccov view --report TestResults.xcresult > coverage-report.txt
+            xcresultparser --output-format cobertura TestResults.xcresult > coverage.xml
+      - store_artifacts:
+          path: coverage-report.txt
+          destination: coverage
+      - store_artifacts:
+          path: coverage.xml
+          destination: coverage
 
+  upload-coverage:
+    description: Upload coverage to Qlty Cloud
+    steps:
+      - qlty/coverage_publish:
+          files: coverage.xml
+
+# ---------------------------------------------------------------------------
+# Jobs
+# ---------------------------------------------------------------------------
 jobs:
   build-and-test:
     executor: macos-executor
     steps:
       - checkout
       - install-tools
-      - run:
-          name: Build (Debug)
-          command: |
-            xcodebuild build \
-              -project ClaudeShelf.xcodeproj \
-              -scheme ClaudeShelf \
-              -destination 'platform=macOS' \
-              | xcbeautify || true
+      - run-build
       - run-tests
+      - upload-coverage
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ClaudeShelf.xcodeproj
+            - TestResults.xcresult
+            - TestResults.xml
+            - coverage.xml
+            - coverage-report.txt
 
   build-release:
     executor: macos-executor
     steps:
       - checkout
+      - attach_workspace:
+          at: .
       - install-tools
       - run:
           name: Build (Release)
           command: |
+            set -o pipefail
             xcodebuild build \
               -project ClaudeShelf.xcodeproj \
               -scheme ClaudeShelf \
               -configuration Release \
               -destination 'platform=macOS' \
-              | xcbeautify || true
+              | xcbeautify
 
+# ---------------------------------------------------------------------------
+# Workflows
+# ---------------------------------------------------------------------------
 workflows:
+  pr:
+    jobs:
+      - build-and-test:
+          filters:
+            branches:
+              ignore:
+                - main
+
   main:
     jobs:
-      - build-and-test
+      - build-and-test:
+          filters:
+            branches:
+              only:
+                - main
       - build-release:
           requires:
             - build-and-test
