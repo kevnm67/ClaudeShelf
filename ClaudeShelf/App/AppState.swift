@@ -16,26 +16,25 @@ final class AppState {
     /// The currently selected category filter, or nil for "all".
     var selectedCategory: Category?
 
-    /// Backing storage for the currently selected file.
-    private var _selectedFile: FileEntry?
+    /// The ID of the currently selected file, or nil.
+    var selectedFileID: String?
 
     /// The currently selected file for editing, or nil.
     ///
-    /// When set, refreshes the file's metadata (size, modification date,
-    /// read-only status) from disk to prevent showing stale information.
+    /// Resolves the selected file from its ID and refreshes metadata
+    /// (size, modification date, read-only status) from disk.
     var selectedFile: FileEntry? {
-        get { _selectedFile }
-        set {
-            if let file = newValue {
-                let refreshed = refreshFileMetadata(for: file)
-                _selectedFile = refreshed
-                // Update the corresponding entry in the files array if metadata changed
-                if refreshed != file, let index = files.firstIndex(where: { $0.id == file.id }) {
-                    files[index] = refreshed
-                }
-            } else {
-                _selectedFile = nil
+        get {
+            guard let id = selectedFileID else { return nil }
+            guard let file = files.first(where: { $0.id == id }) else { return nil }
+            let refreshed = refreshFileMetadata(for: file)
+            if refreshed != file, let index = files.firstIndex(where: { $0.id == id }) {
+                files[index] = refreshed
             }
+            return refreshed
+        }
+        set {
+            selectedFileID = newValue?.id
         }
     }
 
@@ -272,8 +271,8 @@ final class AppState {
         files.removeAll { idsToRemove.contains($0.id) }
         selectedFileIDs.subtract(idsToRemove)
 
-        if let selected = selectedFile, idsToRemove.contains(selected.id) {
-            selectedFile = nil
+        if let selectedID = selectedFileID, idsToRemove.contains(selectedID) {
+            selectedFileID = nil
         }
     }
 }

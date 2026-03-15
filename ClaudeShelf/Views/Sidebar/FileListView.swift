@@ -43,14 +43,14 @@ struct FileListView: View {
                         Divider()
                     }
 
-                    List(selection: $appState.selectedFile) {
+                    List(selection: $appState.selectedFileID) {
                         let grouped = groupedAndSortedFiles
 
                         if !grouped.global.isEmpty {
                             Section("Global") {
                                 ForEach(grouped.global) { file in
                                     FileRowView(file: file)
-                                        .tag(Optional(file))
+                                        .tag(file.id)
                                 }
                             }
                         }
@@ -59,7 +59,7 @@ struct FileListView: View {
                             Section("Project") {
                                 ForEach(grouped.project) { file in
                                     FileRowView(file: file)
-                                        .tag(Optional(file))
+                                        .tag(file.id)
                                 }
                             }
                         }
