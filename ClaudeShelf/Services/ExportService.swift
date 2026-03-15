@@ -95,9 +95,9 @@ enum ExportService {
         var errorDescription: String? {
             switch self {
             case .noFiles:
-                return "No files selected for export."
+                "No files selected for export."
             case .zipCreationFailed:
-                return "Failed to create the zip archive. Please try again."
+                "Failed to create the zip archive. Please try again."
             }
         }
     }

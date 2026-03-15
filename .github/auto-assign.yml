@@ -1,0 +1,7 @@
+addReviewers: true
+addAssignees: author
+
+reviewers:
+  - kevnm67
+
+numberOfReviewers: 1

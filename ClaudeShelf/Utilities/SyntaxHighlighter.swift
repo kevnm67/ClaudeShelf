@@ -7,11 +7,10 @@ import AppKit
 /// Claude config files. Uses ``NSRegularExpression`` for pattern matching
 /// and semantic ``NSColor`` values that adapt to light and dark mode.
 enum SyntaxHighlighter {
-
     // MARK: - File Type Detection
 
     /// The format of a configuration file, determined from its extension.
-    enum FileType: Sendable {
+    enum FileType {
         case markdown
         case json
         case yaml
@@ -104,20 +103,40 @@ enum SyntaxHighlighter {
         let text = attributed.string
 
         // Numbers (before strings so string values take precedence)
-        applyPattern(#"\b-?\d+\.?\d*([eE][+-]?\d+)?\b"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.number])
+        applyPattern(
+            #"\b-?\d+\.?\d*([eE][+-]?\d+)?\b"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.number]
+        )
 
         // Booleans and null
-        applyPattern(#"\b(true|false|null)\b"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.boolean])
+        applyPattern(
+            #"\b(true|false|null)\b"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.boolean]
+        )
 
         // String values (all double-quoted strings first)
-        applyPattern(#""[^"\\]*(?:\\.[^"\\]*)*""#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.string])
+        applyPattern(
+            #""[^"\\]*(?:\\.[^"\\]*)*""#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.string]
+        )
 
         // Keys (quoted strings followed by colon) — override string color
-        applyPattern(#""[^"\\]*(?:\\.[^"\\]*)*"\s*:"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.key])
+        applyPattern(
+            #""[^"\\]*(?:\\.[^"\\]*)*"\s*:"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.key]
+        )
     }
 
     // MARK: - YAML Highlighting
@@ -129,32 +148,62 @@ enum SyntaxHighlighter {
         let text = attributed.string
 
         // String values (quoted)
-        applyPattern(#""[^"\\]*(?:\\.[^"\\]*)*"|'[^']*'"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.string])
+        applyPattern(
+            #""[^"\\]*(?:\\.[^"\\]*)*"|'[^']*'"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.string]
+        )
 
         // Numbers (value after colon)
-        applyPattern(#":\s*-?\d+\.?\d*\s*$"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.number],
-                     options: [.anchorsMatchLines])
+        applyPattern(
+            #":\s*-?\d+\.?\d*\s*$"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.number],
+            options: [.anchorsMatchLines]
+        )
 
         // Booleans and null
-        applyPattern(#"\b(true|false|yes|no|null|~)\b"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.boolean])
+        applyPattern(
+            #"\b(true|false|yes|no|null|~)\b"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.boolean]
+        )
 
         // Keys (word characters at start of line followed by colon)
-        applyPattern(#"^[\w][\w.-]*\s*:"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.key],
-                     options: [.anchorsMatchLines])
+        applyPattern(
+            #"^[\w][\w.-]*\s*:"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.key],
+            options: [.anchorsMatchLines]
+        )
 
         // Nested keys (indented keys)
-        applyPattern(#"^\s+[\w][\w.-]*\s*:"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.key],
-                     options: [.anchorsMatchLines])
+        applyPattern(
+            #"^\s+[\w][\w.-]*\s*:"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.key],
+            options: [.anchorsMatchLines]
+        )
 
         // Comments (must be last to override other patterns)
-        applyPattern(#"#.*$"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.comment],
-                     options: [.anchorsMatchLines])
+        applyPattern(
+            #"#.*$"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.comment],
+            options: [.anchorsMatchLines]
+        )
     }
 
     // MARK: - TOML Highlighting
@@ -166,34 +215,69 @@ enum SyntaxHighlighter {
         let text = attributed.string
 
         // String values (quoted)
-        applyPattern(#""[^"\\]*(?:\\.[^"\\]*)*"|'[^']*'"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.string])
+        applyPattern(
+            #""[^"\\]*(?:\\.[^"\\]*)*"|'[^']*'"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.string]
+        )
 
         // Numbers (value after equals)
-        applyPattern(#"=\s*-?\d+\.?\d*"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.number])
+        applyPattern(
+            #"=\s*-?\d+\.?\d*"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.number]
+        )
 
         // Booleans
-        applyPattern(#"\b(true|false)\b"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.boolean])
+        applyPattern(
+            #"\b(true|false)\b"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.boolean]
+        )
 
         // Keys (word characters before equals)
-        applyPattern(#"^[\w][\w.-]*\s*="#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.key],
-                     options: [.anchorsMatchLines])
+        applyPattern(
+            #"^[\w][\w.-]*\s*="#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.key],
+            options: [.anchorsMatchLines]
+        )
 
         // Section headers [section] and [[array]]
-        applyPattern(#"^\[[\w][\w.-]*\]"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.key, .font: Theme.boldFont],
-                     options: [.anchorsMatchLines])
-        applyPattern(#"^\[\[[\w][\w.-]*\]\]"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.key, .font: Theme.boldFont],
-                     options: [.anchorsMatchLines])
+        applyPattern(
+            #"^\[[\w][\w.-]*\]"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.key, .font: Theme.boldFont],
+            options: [.anchorsMatchLines]
+        )
+        applyPattern(
+            #"^\[\[[\w][\w.-]*\]\]"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.key, .font: Theme.boldFont],
+            options: [.anchorsMatchLines]
+        )
 
         // Comments (must be last to override other patterns)
-        applyPattern(#"#.*$"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.comment],
-                     options: [.anchorsMatchLines])
+        applyPattern(
+            #"#.*$"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.comment],
+            options: [.anchorsMatchLines]
+        )
     }
 
     // MARK: - Markdown Highlighting
@@ -205,43 +289,93 @@ enum SyntaxHighlighter {
         let text = attributed.string
 
         // Code blocks (fenced — must come before inline patterns)
-        applyPattern(#"```[^\n]*\n[\s\S]*?```"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.string])
+        applyPattern(
+            #"```[^\n]*\n[\s\S]*?```"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.string]
+        )
 
         // Inline code
-        applyPattern(#"`[^`\n]+`"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.string])
+        applyPattern(
+            #"`[^`\n]+`"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.string]
+        )
 
         // Bold (** or __)
-        applyPattern(#"\*\*[^*]+\*\*"#, to: attributed, in: range, text: text,
-                     attributes: [.font: Theme.boldFont])
-        applyPattern(#"__[^_]+__"#, to: attributed, in: range, text: text,
-                     attributes: [.font: Theme.boldFont])
+        applyPattern(
+            #"\*\*[^*]+\*\*"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.font: Theme.boldFont]
+        )
+        applyPattern(
+            #"__[^_]+__"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.font: Theme.boldFont]
+        )
 
         // Italic (* or _ — single, not double)
-        applyPattern(#"(?<!\*)\*(?!\*)[^*]+(?<!\*)\*(?!\*)"#, to: attributed, in: range, text: text,
-                     attributes: [.obliqueness: NSNumber(value: 0.15)])
-        applyPattern(#"(?<!_)_(?!_)[^_]+(?<!_)_(?!_)"#, to: attributed, in: range, text: text,
-                     attributes: [.obliqueness: NSNumber(value: 0.15)])
+        applyPattern(
+            #"(?<!\*)\*(?!\*)[^*]+(?<!\*)\*(?!\*)"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.obliqueness: NSNumber(value: 0.15)]
+        )
+        applyPattern(
+            #"(?<!_)_(?!_)[^_]+(?<!_)_(?!_)"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.obliqueness: NSNumber(value: 0.15)]
+        )
 
         // Links [text](url)
-        applyPattern(#"\[[^\]]+\]\([^)]+\)"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.link])
+        applyPattern(
+            #"\[[^\]]+\]\([^)]+\)"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.link]
+        )
 
         // List markers
-        applyPattern(#"^\s*[-*+]\s"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.keyword],
-                     options: [.anchorsMatchLines])
+        applyPattern(
+            #"^\s*[-*+]\s"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.keyword],
+            options: [.anchorsMatchLines]
+        )
 
         // Numbered lists
-        applyPattern(#"^\s*\d+\.\s"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.keyword],
-                     options: [.anchorsMatchLines])
+        applyPattern(
+            #"^\s*\d+\.\s"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.keyword],
+            options: [.anchorsMatchLines]
+        )
 
         // Headings (must be last so they override other patterns on heading lines)
-        applyPattern(#"^#{1,6}\s+.*$"#, to: attributed, in: range, text: text,
-                     attributes: [.foregroundColor: Theme.heading, .font: Theme.boldFont],
-                     options: [.anchorsMatchLines])
+        applyPattern(
+            #"^#{1,6}\s+.*$"#,
+            to: attributed,
+            in: range,
+            text: text,
+            attributes: [.foregroundColor: Theme.heading, .font: Theme.boldFont],
+            options: [.anchorsMatchLines]
+        )
     }
 
     // MARK: - Pattern Matching

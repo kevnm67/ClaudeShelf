@@ -29,11 +29,13 @@ struct DeleteConfirmationView: View {
                 Image(systemName: "trash")
                     .font(.largeTitle)
                     .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
 
                 Text(title)
                     .font(.headline)
             }
             .padding(.top, 8)
+            .accessibilityElement(children: .combine)
 
             // File list (scrollable for bulk)
             ScrollView {

@@ -71,10 +71,8 @@ enum CleanupAnalyzer {
     static func uniqueFiles(from items: [CleanupItem]) -> [FileEntry] {
         var seen = Set<String>()
         var result: [FileEntry] = []
-        for item in items {
-            if seen.insert(item.file.id).inserted {
-                result.append(item.file)
-            }
+        for item in items where seen.insert(item.file.id).inserted {
+            result.append(item.file)
         }
         return result
     }

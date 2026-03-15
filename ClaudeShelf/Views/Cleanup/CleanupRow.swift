@@ -6,33 +6,38 @@ struct CleanupRow: View {
     let onToggle: () -> Void
 
     var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(isSelected ? Color.accentColor : .secondary)
-                .accessibilityLabel(isSelected ? "Selected" : "Not selected")
-                .accessibilityAddTraits(.isButton)
+        Button {
+            onToggle()
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(isSelected ? Color.accentColor : .secondary)
 
-            Image(systemName: item.file.category.sfSymbol)
-                .foregroundStyle(.secondary)
-                .frame(width: 16)
+                Image(systemName: item.file.category.sfSymbol)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 16)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.file.displayName)
-                    .font(.body)
-                    .lineLimit(1)
-                Text(item.detail)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(item.file.displayName)
+                        .font(.body)
+                        .lineLimit(1)
+                    Text(item.detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Text(ByteCountFormatter.string(fromByteCount: item.file.size, countStyle: .file))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-
-            Spacer()
-
-            Text(ByteCountFormatter.string(fromByteCount: item.file.size, countStyle: .file))
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            .contentShape(Rectangle())
         }
-        .contentShape(Rectangle())
-        .onTapGesture { onToggle() }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(item.file.displayName), \(item.detail)")
+        .accessibilityValue(isSelected ? "Selected" : "Not selected")
+        .accessibilityAddTraits(.isButton)
     }
 }
 

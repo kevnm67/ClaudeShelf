@@ -1,20 +1,7 @@
 import XCTest
 @testable import ClaudeShelf
 
-final class ExportServiceTests: XCTestCase {
-
-    private var tempDir: URL!
-
-    override func setUp() {
-        super.setUp()
-        tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-    }
-
-    override func tearDown() {
-        try? FileManager.default.removeItem(at: tempDir)
-        super.tearDown()
-    }
+final class ExportServiceTests: TempDirectoryTestCase {
 
     func testExportCreatesZipFile() async throws {
         // Create temp source files
@@ -71,18 +58,42 @@ final class ExportServiceTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: zipPath))
     }
 
+    func testExportThrowsNoFilesError() async {
+        let zipPath = tempDir.appendingPathComponent("empty.zip").path
+        do {
+            try await ExportService.exportAsZip(files: [], to: zipPath)
+            XCTFail("Expected ExportError.noFiles")
+        } catch let error as ExportService.ExportError {
+            XCTAssertEqual(error, .noFiles)
+            XCTAssertNotNil(error.errorDescription)
+            XCTAssertTrue(error.errorDescription?.contains("No files") ?? false)
+        } catch {
+            XCTFail("Expected ExportError.noFiles, got \(error)")
+        }
+    }
+
+    func testExportErrorDescriptions() {
+        let noFiles = ExportService.ExportError.noFiles
+        XCTAssertEqual(noFiles.errorDescription, "No files selected for export.")
+
+        let zipFailed = ExportService.ExportError.zipCreationFailed
+        XCTAssertEqual(zipFailed.errorDescription, "Failed to create the zip archive. Please try again.")
+    }
+
+    func testDefaultFilenameContainsCurrentDate() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let todayString = formatter.string(from: Date())
+        let name = ExportService.defaultFilename()
+        XCTAssertTrue(name.contains(todayString), "Default filename should contain today's date")
+    }
+
     private func makeEntry(name: String, path: String, project: String? = nil) -> FileEntry {
-        FileEntry(
-            id: FileEntry.generateID(from: path),
+        TestFileEntryFactory.make(
             name: name,
             path: path,
-            displayName: name,
-            category: .other,
             scope: .global,
-            project: project,
-            size: 100,
-            modifiedDate: Date(),
-            isReadOnly: false
+            project: project
         )
     }
 }

@@ -21,7 +21,9 @@ struct CleanupSheet: View {
                 Spacer()
                 if !items.isEmpty {
                     Button("Select All") { selectedIDs = Set(items.map(\.id)) }
+                        .accessibilityHint("Selects all cleanup candidates")
                     Button("Deselect All") { selectedIDs.removeAll() }
+                        .accessibilityHint("Deselects all cleanup candidates")
                 }
             }
             .padding()

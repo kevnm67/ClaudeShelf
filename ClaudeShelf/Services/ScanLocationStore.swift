@@ -35,7 +35,8 @@ struct ScanLocationStore: ScanLocationStoring, @unchecked Sendable {
     /// - Returns: Merged scan locations combining defaults with saved state.
     func load(defaults: [ScanLocation]) -> [ScanLocation] {
         guard let data = userDefaults.data(forKey: key),
-              let saved = try? JSONDecoder().decode([ScanLocation].self, from: data) else {
+              let saved = try? JSONDecoder().decode([ScanLocation].self, from: data)
+        else {
             Self.logger.debug("No saved scan locations found, returning defaults")
             return defaults
         }
@@ -61,7 +62,10 @@ struct ScanLocationStore: ScanLocationStoring, @unchecked Sendable {
             result.append(savedLoc)
         }
 
-        Self.logger.debug("Loaded \(result.count) scan locations (\(defaults.count) defaults + \(result.count - defaults.count) custom)")
+        Self.logger
+            .debug(
+                "Loaded \(result.count) scan locations (\(defaults.count) defaults + \(result.count - defaults.count) custom)"
+            )
         return result
     }
 

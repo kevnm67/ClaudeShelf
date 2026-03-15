@@ -1,0 +1,19 @@
+---
+name: Claude Auto-Fix
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+  id-token: write
+  actions: read
+
+jobs:
+  fix:
+    uses: kevnm67/engineering-toolkit/.github/workflows/reusable-claude-fix.yml@main
+    secrets:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

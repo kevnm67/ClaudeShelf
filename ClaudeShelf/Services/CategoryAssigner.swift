@@ -1,13 +1,15 @@
 import Foundation
 
+// swiftlint:disable cyclomatic_complexity
 /// Assigns categories to discovered files based on 12 priority rules.
 ///
 /// Rules are evaluated in priority order; the first match wins.
 /// This maps directly to the category assignment specification in PROJECT.md.
-struct CategoryAssigner: Sendable {
-
+enum CategoryAssigner {
     /// Assigns a category to a file based on 12 priority rules.
     /// First matching rule wins (priority order).
+    ///
+    /// 12 priority rules require sequential evaluation by design.
     ///
     /// - Parameters:
     ///   - fileName: The file's name (e.g., "CLAUDE.md", "settings.json").
@@ -83,3 +85,5 @@ struct CategoryAssigner: Sendable {
         return .other
     }
 }
+
+// swiftlint:enable cyclomatic_complexity

@@ -1,5 +1,5 @@
-import SwiftUI
 import os
+import SwiftUI
 
 /// Central MVVM state container for the ClaudeShelf app.
 ///
@@ -14,10 +14,10 @@ final class AppState {
     var files: [FileEntry] = []
 
     /// The currently selected category filter, or nil for "all".
-    var selectedCategory: Category? = nil
+    var selectedCategory: Category?
 
     /// Backing storage for the currently selected file.
-    private var _selectedFile: FileEntry? = nil
+    private var _selectedFile: FileEntry?
 
     /// The currently selected file for editing, or nil.
     ///
@@ -49,10 +49,10 @@ final class AppState {
     var scanLocations: [ScanLocation]
 
     /// When the last scan completed, or nil if no scan has run.
-    var lastScanDate: Date? = nil
+    var lastScanDate: Date?
 
     /// An error message to display to the user, or nil.
-    var errorMessage: String? = nil
+    var errorMessage: String?
 
     // MARK: - Bulk Selection
 
@@ -81,7 +81,7 @@ final class AppState {
 
     init(store: ScanLocationStoring = ScanLocationStore()) {
         self.store = store
-        self.scanLocations = store.load(defaults: ScanLocation.defaultLocations)
+        scanLocations = store.load(defaults: ScanLocation.defaultLocations)
     }
 
     // MARK: - Scan Location Management
@@ -183,9 +183,9 @@ final class AppState {
             let query = searchText.lowercased()
             result = result.filter {
                 $0.name.lowercased().contains(query) ||
-                $0.displayName.lowercased().contains(query) ||
-                $0.path.lowercased().contains(query) ||
-                ($0.project?.lowercased().contains(query) ?? false)
+                    $0.displayName.lowercased().contains(query) ||
+                    $0.path.lowercased().contains(query) ||
+                    ($0.project?.lowercased().contains(query) ?? false)
             }
         }
         return result

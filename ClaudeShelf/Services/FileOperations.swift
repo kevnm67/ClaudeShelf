@@ -8,8 +8,8 @@ enum FileOperationError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .partialFailure(let succeeded, let failed, _):
-            return "\(succeeded) file(s) processed, \(failed) file(s) failed"
+        case let .partialFailure(succeeded, failed, _):
+            "\(succeeded) file(s) processed, \(failed) file(s) failed"
         }
     }
 }
