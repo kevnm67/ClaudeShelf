@@ -50,6 +50,8 @@ actor FileScanner {
     /// Directories to skip during scanning.
     static let skipDirectories: Set<String> = [
         ".git", "node_modules", ".venv", "__pycache__",
+        "Library", "Applications", "Pictures", "Music", "Movies",
+        "Public", "Downloads", ".Trash",
     ]
 
     /// Max depth for non-`.claude` directories.
@@ -238,7 +240,6 @@ actor FileScanner {
 
             // Skip symlinks to prevent loops and boundary escape
             if resourceValues.isSymbolicLink ?? false {
-                Self.logger.debug("Skipping symlink during scan")
                 continue
             }
 
@@ -283,7 +284,6 @@ actor FileScanner {
         // Cycle detection: resolve canonical path and skip if already visited
         let canonicalPath = itemURL.resolvingSymlinksInPath().path
         guard !visited.contains(canonicalPath) else {
-            Self.logger.debug("Skipping already-visited directory to prevent cycle")
             return
         }
         visited.insert(canonicalPath)
