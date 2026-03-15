@@ -41,6 +41,7 @@ commands:
           name: Install Homebrew dependencies
           command: |
             brew install xcodegen xcbeautify xcresultparser
+            brew link --overwrite xcodegen xcbeautify xcresultparser
       - save_cache:
           key: *homebrew_cache_key
           paths:
